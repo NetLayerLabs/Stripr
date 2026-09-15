@@ -19,6 +19,149 @@ export type Stripr = {
   ],
   "instructions": [
     {
+      "name": "cancelOffer",
+      "docs": [
+        "Returns an offer's unsold tokens to the maker and closes it."
+      ],
+      "discriminator": [
+        92,
+        203,
+        223,
+        40,
+        92,
+        89,
+        53,
+        119
+      ],
+      "accounts": [
+        {
+          "name": "maker",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "offer"
+          ]
+        },
+        {
+          "name": "market",
+          "docs": [
+            "Included so cancellations show up in the market's transaction history."
+          ],
+          "relations": [
+            "offer"
+          ]
+        },
+        {
+          "name": "offer",
+          "writable": true
+        },
+        {
+          "name": "tokenMint",
+          "relations": [
+            "offer"
+          ]
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  102,
+                  102,
+                  101,
+                  114,
+                  95,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "offer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "makerToken",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "maker"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "claimStockYield",
       "docs": [
         "Claims the underlying stock earned from multiplier growth."
@@ -344,6 +487,122 @@ export type Stripr = {
       "args": []
     },
     {
+      "name": "createOffer",
+      "docs": [
+        "Lists PT or YT for sale at a fixed price in the market's quote token."
+      ],
+      "discriminator": [
+        237,
+        233,
+        192,
+        168,
+        248,
+        7,
+        249,
+        241
+      ],
+      "accounts": [
+        {
+          "name": "maker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market"
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "offer",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "maker"
+              },
+              {
+                "kind": "arg",
+                "path": "id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  102,
+                  102,
+                  101,
+                  114,
+                  95,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "offer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "makerToken",
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "docs": [
+            "Token program of the PT/YT mints (the underlying stock's program)."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "id",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "distributeDividend",
       "docs": [
         "Admin deposits a cash dividend for all locked YT."
@@ -418,6 +677,232 @@ export type Stripr = {
       "args": [
         {
           "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "fillOffer",
+      "docs": [
+        "Buys all or part of an offer at the price the taker expects."
+      ],
+      "discriminator": [
+        83,
+        15,
+        200,
+        85,
+        160,
+        80,
+        164,
+        61
+      ],
+      "accounts": [
+        {
+          "name": "taker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "maker",
+          "docs": [
+            "Receives the payment and, once the offer sells out, its rent."
+          ],
+          "writable": true,
+          "relations": [
+            "offer"
+          ]
+        },
+        {
+          "name": "market",
+          "relations": [
+            "offer"
+          ]
+        },
+        {
+          "name": "offer",
+          "writable": true
+        },
+        {
+          "name": "tokenMint",
+          "relations": [
+            "offer"
+          ]
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  102,
+                  102,
+                  101,
+                  114,
+                  95,
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "offer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "takerToken",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "taker"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "dividendMint",
+          "relations": [
+            "market"
+          ]
+        },
+        {
+          "name": "takerQuote",
+          "writable": true
+        },
+        {
+          "name": "makerQuote",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "maker"
+              },
+              {
+                "kind": "account",
+                "path": "dividendTokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "dividendMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "dividendTokenProgram"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "expectedPrice",
           "type": "u64"
         }
       ]
@@ -1203,6 +1688,19 @@ export type Stripr = {
       ]
     },
     {
+      "name": "offer",
+      "discriminator": [
+        215,
+        88,
+        60,
+        71,
+        170,
+        162,
+        73,
+        229
+      ]
+    },
+    {
       "name": "yieldPosition",
       "discriminator": [
         77,
@@ -1241,6 +1739,45 @@ export type Stripr = {
         2,
         49,
         214
+      ]
+    },
+    {
+      "name": "offerCancelled",
+      "discriminator": [
+        45,
+        42,
+        175,
+        214,
+        51,
+        192,
+        154,
+        9
+      ]
+    },
+    {
+      "name": "offerCreated",
+      "discriminator": [
+        31,
+        236,
+        215,
+        144,
+        75,
+        45,
+        157,
+        87
+      ]
+    },
+    {
+      "name": "offerFilled",
+      "discriminator": [
+        173,
+        104,
+        95,
+        161,
+        144,
+        206,
+        72,
+        57
       ]
     },
     {
@@ -1362,6 +1899,21 @@ export type Stripr = {
       "code": 6007,
       "name": "invalidMultiplier",
       "msg": "The stock's scaled UI multiplier is invalid"
+    },
+    {
+      "code": 6008,
+      "name": "invalidOfferToken",
+      "msg": "Offers can only sell this market's PT or YT"
+    },
+    {
+      "code": 6009,
+      "name": "offerPriceChanged",
+      "msg": "The offer's price changed. Review it and try again"
+    },
+    {
+      "code": 6010,
+      "name": "insufficientOfferAmount",
+      "msg": "Not enough left in this offer"
     }
   ],
   "types": [
@@ -1512,6 +2064,196 @@ export type Stripr = {
           },
           {
             "name": "pendingStockYield",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "offer",
+      "docs": [
+        "A fixed-price offer to sell a market's PT or YT for its quote token (the",
+        "market's dividend mint, e.g. USDC). The tokens for sale sit in an escrow",
+        "owned by the offer PDA until they're bought or the maker cancels."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "maker",
+            "type": "pubkey"
+          },
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenMint",
+            "docs": [
+              "The market's PT or YT mint."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "quoteMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "id",
+            "docs": [
+              "Maker-chosen id, so one wallet can list many offers per market."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "docs": [
+              "Quote token base units per whole PT/YT (10^decimals share units)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Share units still for sale."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "initialAmount",
+            "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "offerCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "offer",
+            "type": "pubkey"
+          },
+          {
+            "name": "maker",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Share units returned to the maker."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "offerCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "offer",
+            "type": "pubkey"
+          },
+          {
+            "name": "maker",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenMint",
+            "docs": [
+              "The market's PT or YT mint."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Share units for sale."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "docs": [
+              "Quote token base units per whole PT/YT."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "offerFilled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "offer",
+            "type": "pubkey"
+          },
+          {
+            "name": "maker",
+            "type": "pubkey"
+          },
+          {
+            "name": "taker",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Share units bought."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "cost",
+            "docs": [
+              "Quote token base units paid to the maker."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "remaining",
+            "docs": [
+              "Share units still for sale."
+            ],
             "type": "u64"
           }
         ]
@@ -1728,6 +2470,16 @@ export type Stripr = {
       "name": "marketSeed",
       "type": "bytes",
       "value": "[109, 97, 114, 107, 101, 116]"
+    },
+    {
+      "name": "offerEscrowSeed",
+      "type": "bytes",
+      "value": "[111, 102, 102, 101, 114, 95, 101, 115, 99, 114, 111, 119]"
+    },
+    {
+      "name": "offerSeed",
+      "type": "bytes",
+      "value": "[111, 102, 102, 101, 114]"
     },
     {
       "name": "positionSeed",

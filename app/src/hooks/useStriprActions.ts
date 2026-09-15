@@ -9,11 +9,16 @@ import { describeError } from "@/lib/errors";
 import { formatAmount } from "@/lib/format";
 import {
   ataAddress,
+  findOfferAddress,
+  findOfferEscrowAddress,
   getProgram,
+  offerCost,
   rawForShares,
   sharesForRaw,
   toBN,
   type MarketView,
+  type OfferAsset,
+  type OfferView,
 } from "@/lib/stripr";
 
 type StriprProgram = ReturnType<typeof getProgram>;
@@ -90,6 +95,7 @@ export function useStriprActions(market: MarketView | undefined) {
         queryClient.invalidateQueries({ queryKey: ["position"] }),
         queryClient.invalidateQueries({ queryKey: ["position-counts"] }),
         queryClient.invalidateQueries({ queryKey: ["history"] }),
+        queryClient.invalidateQueries({ queryKey: ["offers"] }),
       ]),
     [queryClient]
   );
@@ -297,6 +303,95 @@ export function useStriprActions(market: MarketView | undefined) {
                 dividendMint: m.account.dividendMint,
                 adminDividend: ataAddress(m.account.dividendMint, user, m.dividend.programId),
                 dividendTokenProgram: m.dividend.programId,
+              })
+              .instruction(),
+          ]
+        ),
+
+      /** Lists `amount` PT or YT at `price` quote base units per whole token, unlocking YT first if needed. */
+      listOffer: (asset: OfferAsset, amount: bigint, price: bigint, unlockFirst: bigint) =>
+        execute(
+          asset === "yt" ? "Sell future dividends" : "Sell principal",
+          (m) => [
+            ...(unlockFirst > 0n ? [{ label: "Unlock first", value: yt(m, unlockFirst) }] : []),
+            { label: "List", value: asset === "yt" ? yt(m, amount) : pt(m, amount) },
+            { label: "Price", value: `${dividend(m, price)} each` },
+            {
+              label: "You receive when it sells",
+              value: dividend(m, offerCost(price, amount, m.underlying.decimals)),
+            },
+          ],
+          async (program, m, user) => {
+            const id = BigInt(Date.now());
+            const tokenMint = asset === "yt" ? m.account.ytMint : m.account.ptMint;
+            const offer = findOfferAddress(m.address, user, id);
+            const create = await program.methods
+              .createOffer(toBN(id), toBN(amount), toBN(price))
+              .accountsPartial({
+                maker: user,
+                market: m.address,
+                tokenMint,
+                offer,
+                escrow: findOfferEscrowAddress(offer),
+                makerToken: ataAddress(tokenMint, user, m.underlying.programId),
+                tokenProgram: m.underlying.programId,
+              })
+              .instruction();
+            return unlockFirst > 0n ? [await unlockInstruction(program, m, user, unlockFirst), create] : [create];
+          }
+        ),
+
+      /** Buys `amount` share units from an offer, optionally locking bought YT in the same transaction. */
+      buyOffer: (offer: OfferView, amount: bigint, lockAfter: boolean) =>
+        execute(
+          offer.asset === "yt" ? "Buy future dividends" : "Buy principal",
+          (m) => [
+            { label: "Buy", value: offer.asset === "yt" ? yt(m, amount) : pt(m, amount) },
+            { label: "Pay", value: dividend(m, offerCost(offer.price, amount, m.underlying.decimals)) },
+            ...(lockAfter && offer.asset === "yt" ? [{ label: "Lock to earn", value: yt(m, amount) }] : []),
+          ],
+          async (program, m, user) => {
+            const fill = await program.methods
+              .fillOffer(toBN(amount), toBN(offer.price))
+              .accountsPartial({
+                taker: user,
+                maker: offer.maker,
+                market: m.address,
+                offer: offer.address,
+                tokenMint: offer.tokenMint,
+                escrow: findOfferEscrowAddress(offer.address),
+                takerToken: ataAddress(offer.tokenMint, user, m.underlying.programId),
+                dividendMint: m.account.dividendMint,
+                takerQuote: ataAddress(m.account.dividendMint, user, m.dividend.programId),
+                makerQuote: ataAddress(m.account.dividendMint, offer.maker, m.dividend.programId),
+                tokenProgram: m.underlying.programId,
+                dividendTokenProgram: m.dividend.programId,
+              })
+              .instruction();
+            return lockAfter && offer.asset === "yt"
+              ? [fill, await lockInstruction(program, m, user, amount)]
+              : [fill];
+          }
+        ),
+
+      cancelOffer: (offer: OfferView) =>
+        execute(
+          "Cancel listing",
+          (m) => [
+            { label: "Return to wallet", value: offer.asset === "yt" ? yt(m, offer.amount) : pt(m, offer.amount) },
+            { label: "Listing rent", value: "Refunded" },
+          ],
+          async (program, m, user) => [
+            await program.methods
+              .cancelOffer()
+              .accountsPartial({
+                maker: user,
+                market: m.address,
+                offer: offer.address,
+                tokenMint: offer.tokenMint,
+                escrow: findOfferEscrowAddress(offer.address),
+                makerToken: ataAddress(offer.tokenMint, user, m.underlying.programId),
+                tokenProgram: m.underlying.programId,
               })
               .instruction(),
           ]

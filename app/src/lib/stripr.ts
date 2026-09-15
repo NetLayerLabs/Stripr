@@ -253,3 +253,63 @@ export function claimableStockYield(position: PositionAccount | null, market: Ma
 /** Lifetime cash dividends per whole YT, in dividend base units. */
 export const dividendPerYt = (market: MarketView) =>
   (market.accDividendPerYt * pow10(market.underlying.decimals)) / ACC_PRECISION;
+
+export type OfferAccount = IdlAccounts<Stripr>["offer"];
+export type OfferAsset = "pt" | "yt";
+
+export type OfferView = {
+  address: PublicKey;
+  maker: PublicKey;
+  asset: OfferAsset;
+  tokenMint: PublicKey;
+  id: bigint;
+  /** Quote token base units per whole PT/YT. */
+  price: bigint;
+  /** Share units still for sale. */
+  amount: bigint;
+  initialAmount: bigint;
+  createdAt: number;
+};
+
+const u64Le = (value: bigint) => {
+  const bytes = new Uint8Array(8);
+  new DataView(bytes.buffer).setBigUint64(0, value, true);
+  return bytes;
+};
+
+export const findOfferAddress = (market: PublicKey, maker: PublicKey, id: bigint) =>
+  PublicKey.findProgramAddressSync(
+    [new TextEncoder().encode("offer"), market.toBytes(), maker.toBytes(), u64Le(id)],
+    PROGRAM_ID
+  )[0];
+
+export const findOfferEscrowAddress = (offer: PublicKey) =>
+  PublicKey.findProgramAddressSync([new TextEncoder().encode("offer_escrow"), offer.toBytes()], PROGRAM_ID)[0];
+
+/** Quote tokens owed for `amount` share units (mirrors `Offer::cost`, rounding up). */
+export const offerCost = (price: bigint, amount: bigint, decimals: number) =>
+  amount === 0n ? 0n : ceilDiv(amount * price, pow10(decimals));
+
+/** Open offers in a market, cheapest first. */
+export async function fetchOffers(connection: Connection, market: MarketView): Promise<OfferView[]> {
+  const program = getProgram(connection);
+  const offers = await program.account.offer.all([
+    { dataSize: program.account.offer.size },
+    // Offer layout: 8-byte discriminator, maker, then market.
+    { memcmp: { offset: 8 + 32, bytes: market.address.toBase58() } },
+  ]);
+  return offers
+    .map(({ publicKey, account }) => ({
+      address: publicKey,
+      maker: account.maker,
+      asset: (account.tokenMint.equals(market.account.ptMint) ? "pt" : "yt") as OfferAsset,
+      tokenMint: account.tokenMint,
+      id: toBigInt(account.id),
+      price: toBigInt(account.price),
+      amount: toBigInt(account.amount),
+      initialAmount: toBigInt(account.initialAmount),
+      createdAt: account.createdAt.toNumber() * 1000,
+    }))
+    .filter((offer) => offer.amount > 0n)
+    .sort((a, b) => (a.price === b.price ? a.createdAt - b.createdAt : a.price < b.price ? -1 : 1));
+}
