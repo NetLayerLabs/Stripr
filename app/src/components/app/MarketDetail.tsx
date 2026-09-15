@@ -12,6 +12,7 @@ import { MarketAnalytics } from "./MarketAnalytics";
 import { MarketHeader, MarketStats } from "./MarketOverview";
 import { PositionCard } from "./PositionCard";
 import { DashboardSkeleton, ErrorState } from "./States";
+import { TradePanel } from "./TradePanel";
 
 export function MarketDetail({ address }: { address: string }) {
   const markets = useMarkets();
@@ -50,6 +51,7 @@ export function MarketDetail({ address }: { address: string }) {
           {isAdmin ? <AdminCard market={market} position={position.data} actions={actions} /> : null}
         </div>
       </div>
+      <TradePanel market={market} position={position.data} actions={actions} />
       <MarketAnalytics market={market} />
     </div>
   );

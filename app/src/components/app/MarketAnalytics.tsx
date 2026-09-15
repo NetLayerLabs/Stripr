@@ -34,7 +34,12 @@ const EVENT_META: Record<string, { label: string; asset: TokenKind }> = {
   yieldClaimed: { label: "Claim cash", asset: "usd" },
   multiplierSynced: { label: "Dividend reinvested", asset: "stock" },
   stockYieldClaimed: { label: "Claim stock", asset: "stock" },
+  offerCreated: { label: "Listed for sale", asset: "yt" },
+  offerFilled: { label: "Bought", asset: "yt" },
+  offerCancelled: { label: "Listing cancelled", asset: "yt" },
 };
+
+const isOfferEvent = (event: MarketEvent) => event.name.startsWith("offer");
 
 const CHART_HEIGHT = 260;
 
@@ -217,10 +222,21 @@ function RecentActivity({
   const { addressUrl, txUrl } = useNetwork();
   const recent = useMemo(() => [...events].reverse().slice(0, 12), [events]);
 
+  const offerAsset = (event: MarketEvent): TokenKind =>
+    event.data.tokenMint === market.account.ptMint.toBase58() ? "pt" : "yt";
+
   const amountLabel = (event: MarketEvent) => {
     const meta = EVENT_META[event.name];
     const amount = eventAmount(event);
     const { decimals } = market.underlying;
+    if (isOfferEvent(event)) {
+      const tokens = `${formatAmount(amount, decimals, 2)} ${offerAsset(event).toUpperCase()}-${market.symbol}`;
+      const quote = (field: string) =>
+        `${formatAmount(BigInt(event.data[field] ?? "0"), market.dividend.decimals, 2)} ${market.dividendSymbol}`;
+      if (event.name === "offerFilled") return `${tokens} for ${quote("cost")}`;
+      if (event.name === "offerCreated") return `${tokens} @ ${quote("price")}`;
+      return tokens;
+    }
     if (event.name === "multiplierSynced") {
       const multiplier = BigInt(event.data.multiplier ?? "0");
       const released = (BigInt(event.data.freed ?? "0") * multiplier) / MULTIPLIER_ONE;
@@ -263,24 +279,26 @@ function RecentActivity({
             <tbody className="divide-y divide-white/[0.04]">
               {recent.map((event, index) => {
                 const meta = EVENT_META[event.name] ?? { label: event.name, asset: "stock" as TokenKind };
+                const kind = isOfferEvent(event) ? offerAsset(event) : meta.asset;
+                const account = event.data.user ?? event.data.taker ?? event.data.maker;
                 const time = eventTime(event);
                 return (
                   <tr key={`${event.signature}-${event.name}-${index}`}>
                     <td className="px-5 py-3 sm:px-6">
                       <span className="flex items-center gap-2.5 text-zinc-100">
-                        <TokenIcon kind={meta.asset} symbol={market.symbol} size="sm" />
+                        <TokenIcon kind={kind} symbol={market.symbol} size="sm" />
                         {meta.label}
                       </span>
                     </td>
                     <td className="px-5 py-3">
-                      {event.data.user ? (
+                      {account ? (
                         <a
-                          href={addressUrl(event.data.user)}
+                          href={addressUrl(account)}
                           target="_blank"
                           rel="noreferrer"
                           className="font-mono text-xs text-zinc-400 transition-colors hover:text-zinc-200"
                         >
-                          {shortAddress(event.data.user)}
+                          {shortAddress(account)}
                         </a>
                       ) : (
                         <span className="text-xs text-zinc-500">
