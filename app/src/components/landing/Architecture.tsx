@@ -4,12 +4,17 @@ import { Section } from "./Section";
 
 const INSTRUCTIONS = [
   { name: "initialize_market", signer: "Admin", body: "Creates the market, PT and YT mints, and all three vaults." },
-  { name: "strip", signer: "User", body: "Deposits stock and mints PT + YT 1:1." },
-  { name: "redeem", signer: "User", body: "Burns PT + YT 1:1 and releases the stock." },
-  { name: "lock_yt", signer: "User", body: "Moves YT into escrow and starts accrual." },
+  { name: "strip", signer: "User", body: "Deposits stock and mints equal PT + YT in share units." },
+  { name: "redeem", signer: "User", body: "Burns equal PT + YT and releases the stock." },
+  { name: "lock_yt", signer: "User", body: "Moves YT into escrow and starts earning." },
   { name: "unlock_yt", signer: "User", body: "Returns YT; earned dividends stay claimable." },
-  { name: "distribute_dividend", signer: "Admin", body: "Deposits USDC and advances the dividend index." },
-  { name: "claim_yield", signer: "User", body: "Pays out everything the position has earned." },
+  { name: "sync_multiplier", signer: "Anyone", body: "Pays reinvested dividends to locked YT when the stock’s multiplier rises." },
+  { name: "distribute_dividend", signer: "Admin", body: "Deposits a cash dividend and advances the dividend index." },
+  { name: "claim_stock_yield", signer: "User", body: "Pays out reinvested dividends in the stock." },
+  { name: "claim_yield", signer: "User", body: "Pays out cash dividends." },
+  { name: "create_offer", signer: "Seller", body: "Escrows PT or YT for sale at a fixed USDC price." },
+  { name: "fill_offer", signer: "Buyer", body: "Buys all or part of an offer at the price the buyer saw." },
+  { name: "cancel_offer", signer: "Seller", body: "Returns unsold tokens and closes the offer." },
 ];
 
 const GUARANTEES = [
@@ -25,13 +30,13 @@ const GUARANTEES = [
   },
   {
     icon: Layers,
-    title: "Always 1:1 backed",
-    body: "PT and YT are only minted against stock deposited in the vault, and must be burned together to release it.",
+    title: "Always fully backed",
+    body: "PT and YT are only minted against stock in the vault, in share units at the stock’s multiplier, and must be burned together to release it.",
   },
   {
     icon: ShieldCheck,
     title: "Tight access control",
-    body: "Vaults and mints belong to the market PDA, only the market admin can distribute, and all arithmetic is checked.",
+    body: "Vaults, mints and offer escrows belong to program PDAs. Only the admin can pay cash dividends, only the seller can cancel an offer, and all arithmetic is checked.",
   },
 ];
 
@@ -88,7 +93,7 @@ export function Architecture() {
               accent
               name="Market"
               seeds={'["market", stock_mint]'}
-              detail="One per stock. Stores the admin, the mints and the dividend index, and signs for every vault."
+              detail="One per stock. Stores the admin, the mints, the stock’s multiplier and both dividend indexes, and signs for every vault."
             />
             <Connector label="owns" />
             <div className="grid gap-2 sm:grid-cols-3">
@@ -105,8 +110,15 @@ export function Architecture() {
             <AccountBox
               name="YieldPosition"
               seeds={'["position", market, user]'}
-              detail="One per user and market: locked YT, dividend debt, unclaimed and claimed totals."
+              detail="One per user and market: locked YT, plus earned and claimed cash and stock dividends."
             />
+            <div className="mt-2">
+              <AccountBox
+                name="Offer"
+                seeds={'["offer", market, seller, id]'}
+                detail="One per listing: PT or YT for sale, its price and what’s left. Its own escrow holds the tokens."
+              />
+            </div>
           </div>
         </div>
 

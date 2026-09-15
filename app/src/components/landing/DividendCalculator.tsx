@@ -68,7 +68,7 @@ export function DividendCalculator() {
             onChange={setLocked}
             suffix="YT"
           />
-          <NumberField label="Dividend payout" hint="Deposited by the admin" value={payout} onChange={setPayout} suffix="USDC" />
+          <NumberField label="Dividend payout" hint="One payout, in USDC" value={payout} onChange={setPayout} suffix="USDC" />
         </div>
 
         <div className="flex flex-col justify-between gap-8 border-t border-white/[0.06] bg-gradient-to-br from-emerald-400/[0.08] via-transparent to-transparent p-6 sm:p-8 lg:border-l lg:border-t-0">

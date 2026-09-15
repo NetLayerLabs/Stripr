@@ -28,12 +28,12 @@ const COMPARISON = [
   {
     topic: "Income",
     before: "Blended into the token price",
-    after: "Accrues per YT and is claimable in USDC",
+    after: "Accrues to locked YT and is claimable as stock or USDC",
   },
   {
     topic: "Ownership",
     before: "Sell the share to give up the income",
-    after: "PT and YT can sit with different owners",
+    after: "Sell YT for USDC and keep the share through PT",
   },
 ];
 

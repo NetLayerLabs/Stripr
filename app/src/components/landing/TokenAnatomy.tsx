@@ -4,10 +4,10 @@ import { Section } from "./Section";
 
 const ROWS: Array<{ label: string; pt: string; yt: string }> = [
   { label: "Represents", pt: "The claim on the underlying share", yt: "The right to the share’s dividends" },
-  { label: "Earns", pt: "No payouts; it carries the stock itself", yt: "USDC dividends, pro-rata, while locked" },
+  { label: "Earns", pt: "No payouts; it carries the stock itself", yt: "Reinvested dividends in the stock, plus cash payouts, while locked" },
   { label: "Redeems", pt: "With equal YT, for the stock, any time", yt: "With equal PT, for the stock, any time" },
-  { label: "Token", pt: "Standard SPL token, freely transferable", yt: "Standard SPL token; lock it in escrow to earn" },
-  { label: "Built for", pt: "Holders who want the share without the income", yt: "Income seekers and dividend traders" },
+  { label: "Trade", pt: "Standard SPL token; list it for USDC in the app", yt: "Standard SPL token; lock it to earn or sell it for USDC" },
+  { label: "Built for", pt: "Holders who want the share without the income", yt: "Income investors and dividend traders" },
 ];
 
 function Chip({ kind, symbol }: { kind: TokenKind; symbol: string }) {

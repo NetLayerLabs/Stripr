@@ -302,7 +302,7 @@ function RecentActivity({
                         </a>
                       ) : (
                         <span className="text-xs text-zinc-500">
-                          {event.name === "multiplierSynced" ? "Stock issuer" : "Market admin"}
+                          {event.name === "multiplierSynced" ? "Dividend sync" : "Market admin"}
                         </span>
                       )}
                     </td>

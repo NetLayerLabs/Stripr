@@ -102,8 +102,8 @@ export function LiveXStock() {
       ) : null}
 
       <p className="mt-auto pt-5 text-xs leading-relaxed text-zinc-500">
-        xStocks reinvest dividends by raising this multiplier. Routing that growth to YT holders is next on the
-        Stripr roadmap.
+        xStocks reinvest dividends by raising this multiplier. Stripr reads it on-chain and pays that growth to
+        locked YT holders as extra stock.
       </p>
     </div>
   );
