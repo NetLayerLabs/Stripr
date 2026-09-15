@@ -12,6 +12,7 @@
     "deploy:devnet": "ANCHOR_BUILD_SBF_ARCH=v2 anchor build && anchor deploy --provider.cluster devnet",
     "setup:devnet": "anchor run setup-demo --provider.cluster devnet",
     "seed:devnet": "anchor run seed-markets --provider.cluster devnet",
+    "seed:offers:devnet": "anchor run seed-offers --provider.cluster devnet",
     "deploy:mainnet": "ANCHOR_BUILD_SBF_ARCH=v2 anchor build && anchor deploy --provider.cluster mainnet --provider.wallet ~/.config/solana/stripr-mainnet-deployer.json",
     "reinvest:devnet": "anchor run reinvest-dividend --provider.cluster devnet"
   },

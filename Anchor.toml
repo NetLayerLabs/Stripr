@@ -22,6 +22,7 @@ wallet = "~/.config/solana/id.json"
 [scripts]
 setup-demo = "npx tsx scripts/setup-demo.ts"
 seed-markets = "npx tsx scripts/seed-markets.ts"
+seed-offers = "npx tsx scripts/seed-offers.ts"
 reinvest-dividend = "npx tsx scripts/reinvest-dividend.ts"
 test = "npx mocha --require tsx/cjs -t 1000000 'tests/**/*.ts'"
 
