@@ -18,4 +18,10 @@ pub enum StriprError {
     NothingToClaim,
     #[msg("The stock's scaled UI multiplier is invalid")]
     InvalidMultiplier,
+    #[msg("Offers can only sell this market's PT or YT")]
+    InvalidOfferToken,
+    #[msg("The offer's price changed. Review it and try again")]
+    OfferPriceChanged,
+    #[msg("Not enough left in this offer")]
+    InsufficientOfferAmount,
 }

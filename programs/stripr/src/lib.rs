@@ -62,4 +62,19 @@ pub mod stripr {
     pub fn sync_multiplier(ctx: Context<SyncMultiplier>) -> Result<()> {
         handle_sync_multiplier(ctx)
     }
+
+    /// Lists PT or YT for sale at a fixed price in the market's quote token.
+    pub fn create_offer(ctx: Context<CreateOffer>, id: u64, amount: u64, price: u64) -> Result<()> {
+        handle_create_offer(ctx, id, amount, price)
+    }
+
+    /// Buys all or part of an offer at the price the taker expects.
+    pub fn fill_offer(ctx: Context<FillOffer>, amount: u64, expected_price: u64) -> Result<()> {
+        handle_fill_offer(ctx, amount, expected_price)
+    }
+
+    /// Returns an offer's unsold tokens to the maker and closes it.
+    pub fn cancel_offer(ctx: Context<CancelOffer>) -> Result<()> {
+        handle_cancel_offer(ctx)
+    }
 }

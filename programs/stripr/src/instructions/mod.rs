@@ -1,6 +1,9 @@
+pub mod cancel_offer;
 pub mod claim_stock_yield;
 pub mod claim_yield;
+pub mod create_offer;
 pub mod distribute_dividend;
+pub mod fill_offer;
 pub mod initialize_market;
 pub mod lock_yt;
 pub mod redeem;
@@ -8,9 +11,12 @@ pub mod strip;
 pub mod sync_multiplier;
 pub mod unlock_yt;
 
+pub use cancel_offer::*;
 pub use claim_stock_yield::*;
 pub use claim_yield::*;
+pub use create_offer::*;
 pub use distribute_dividend::*;
+pub use fill_offer::*;
 pub use initialize_market::*;
 pub use lock_yt::*;
 pub use redeem::*;

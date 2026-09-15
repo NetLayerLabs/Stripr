@@ -67,3 +67,42 @@ pub struct StockYieldClaimed {
     /// Raw underlying paid out.
     pub amount: u64,
 }
+
+#[event]
+pub struct OfferCreated {
+    pub market: Pubkey,
+    pub offer: Pubkey,
+    pub maker: Pubkey,
+    /// The market's PT or YT mint.
+    pub token_mint: Pubkey,
+    /// Share units for sale.
+    pub amount: u64,
+    /// Quote token base units per whole PT/YT.
+    pub price: u64,
+}
+
+#[event]
+pub struct OfferFilled {
+    pub market: Pubkey,
+    pub offer: Pubkey,
+    pub maker: Pubkey,
+    pub taker: Pubkey,
+    pub token_mint: Pubkey,
+    /// Share units bought.
+    pub amount: u64,
+    pub price: u64,
+    /// Quote token base units paid to the maker.
+    pub cost: u64,
+    /// Share units still for sale.
+    pub remaining: u64,
+}
+
+#[event]
+pub struct OfferCancelled {
+    pub market: Pubkey,
+    pub offer: Pubkey,
+    pub maker: Pubkey,
+    pub token_mint: Pubkey,
+    /// Share units returned to the maker.
+    pub amount: u64,
+}

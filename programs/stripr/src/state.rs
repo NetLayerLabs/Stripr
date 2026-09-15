@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::{ACC_PRECISION, MARKET_SEED, MULTIPLIER_ONE},
+    constants::{ACC_PRECISION, MARKET_SEED, MULTIPLIER_ONE, OFFER_SEED},
     errors::StriprError,
 };
 
@@ -202,9 +202,61 @@ impl YieldPosition {
     }
 }
 
+/// A fixed-price offer to sell a market's PT or YT for its quote token (the
+/// market's dividend mint, e.g. USDC). The tokens for sale sit in an escrow
+/// owned by the offer PDA until they're bought or the maker cancels.
+#[account]
+#[derive(InitSpace)]
+pub struct Offer {
+    pub maker: Pubkey,
+    pub market: Pubkey,
+    /// The market's PT or YT mint.
+    pub token_mint: Pubkey,
+    pub quote_mint: Pubkey,
+    /// Maker-chosen id, so one wallet can list many offers per market.
+    pub id: u64,
+    /// Quote token base units per whole PT/YT (10^decimals share units).
+    pub price: u64,
+    /// Share units still for sale.
+    pub amount: u64,
+    pub initial_amount: u64,
+    pub created_at: i64,
+    pub bump: u8,
+}
+
+impl Offer {
+    pub fn signer_seeds<'a>(&'a self, id_bytes: &'a [u8; 8]) -> [&'a [u8]; 5] {
+        [
+            OFFER_SEED,
+            self.market.as_ref(),
+            self.maker.as_ref(),
+            id_bytes,
+            std::slice::from_ref(&self.bump),
+        ]
+    }
+
+    /// Quote tokens owed for `amount` share units at `price`. Rounds up, in the maker's favor.
+    pub fn cost(price: u64, amount: u64, decimals: u8) -> Result<u64> {
+        let cost = (amount as u128)
+            .checked_mul(price as u128)
+            .ok_or(StriprError::MathOverflow)?
+            .div_ceil(10u128.pow(decimals as u32));
+        u64::try_from(cost).map_err(|_| StriprError::MathOverflow.into())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn offer_cost_rounds_up_for_the_maker() {
+        // 2.50 USDC (6 decimals) per whole YT with 8 decimals.
+        assert_eq!(Offer::cost(2_500_000, 150_000_000, 8).unwrap(), 3_750_000);
+        assert_eq!(Offer::cost(2_500_000, 1, 8).unwrap(), 1);
+        assert_eq!(Offer::cost(2_500_000, 0, 8).unwrap(), 0);
+        assert!(Offer::cost(u64::MAX, u64::MAX, 0).is_err());
+    }
 
     fn new_market() -> Market {
         Market {

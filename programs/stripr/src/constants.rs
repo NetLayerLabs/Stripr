@@ -14,6 +14,10 @@ pub const DIVIDEND_VAULT_SEED: &[u8] = b"dividend_vault";
 pub const YT_ESCROW_SEED: &[u8] = b"yt_escrow";
 #[constant]
 pub const POSITION_SEED: &[u8] = b"position";
+#[constant]
+pub const OFFER_SEED: &[u8] = b"offer";
+#[constant]
+pub const OFFER_ESCROW_SEED: &[u8] = b"offer_escrow";
 
 /// Fixed-point scale for the per-YT yield indexes.
 pub const ACC_PRECISION: u128 = 1_000_000_000_000;
