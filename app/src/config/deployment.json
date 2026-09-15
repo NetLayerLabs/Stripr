@@ -1,0 +1,58 @@
+{
+  "devnet": {
+    "tokens": {
+      "H81enMAya34hX9j5k5VhyndkYmKBqKZRUadDJ8F4WbiD": {
+        "symbol": "USDC",
+        "name": "USD Coin (demo)"
+      },
+      "96uvN2wFrd3aYFV4o4TQhaaPmCUGMTSZXhmn43v1N18D": {
+        "symbol": "AAPL",
+        "name": "Apple Inc."
+      },
+      "H7PFhFe3NuTFpM6EnasMDJQ9G5GsxN8v9kBbmwdFNuFf": {
+        "symbol": "MSFT",
+        "name": "Microsoft Corp."
+      },
+      "74TFjUrXEwHuUKY9wqcihEEo5oL1Z6TqPKBTWzjKjeMw": {
+        "symbol": "JNJ",
+        "name": "Johnson & Johnson"
+      },
+      "26eoRXzMF4U1Fc7JqsmW8gjJ7xeEdryh3c5MWa89U2Td": {
+        "symbol": "KO",
+        "name": "Coca-Cola Co."
+      },
+      "FroQThGmuQdYSwYpqCvdy79JWC37TFFx38CbqkMvnYd3": {
+        "symbol": "PG",
+        "name": "Procter & Gamble Co."
+      }
+    }
+  },
+  "mainnet-beta": {
+    "tokens": {
+      "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+        "symbol": "USDC",
+        "name": "USD Coin"
+      },
+      "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp": {
+        "symbol": "AAPLx",
+        "name": "Apple xStock"
+      },
+      "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W": {
+        "symbol": "SPYx",
+        "name": "SP500 xStock"
+      },
+      "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB": {
+        "symbol": "TSLAx",
+        "name": "Tesla xStock"
+      },
+      "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh": {
+        "symbol": "NVDAx",
+        "name": "NVIDIA xStock"
+      },
+      "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX": {
+        "symbol": "MSFTx",
+        "name": "Microsoft xStock"
+      }
+    }
+  }
+}
