@@ -1,0 +1,32 @@
+{
+  "name": "stripr",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "idl:sync": "cp target/idl/stripr.json app/src/idl/stripr.json && cp target/types/stripr.ts app/src/idl/stripr.ts",
+    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "build:program": "ANCHOR_BUILD_SBF_ARCH=v2 anchor build",
+    "test:program": "ANCHOR_BUILD_SBF_ARCH=v2 ANCHOR_TEST_VALIDATOR=legacy anchor test",
+    "setup:demo": "anchor run setup-demo",
+    "deploy:devnet": "ANCHOR_BUILD_SBF_ARCH=v2 anchor build && anchor deploy --provider.cluster devnet",
+    "setup:devnet": "anchor run setup-demo --provider.cluster devnet",
+    "seed:devnet": "anchor run seed-markets --provider.cluster devnet",
+    "deploy:mainnet": "ANCHOR_BUILD_SBF_ARCH=v2 anchor build && anchor deploy --provider.cluster mainnet --provider.wallet ~/.config/solana/stripr-mainnet-deployer.json",
+    "reinvest:devnet": "anchor run reinvest-dividend --provider.cluster devnet"
+  },
+  "dependencies": {
+    "@anchor-lang/core": "^1.2.0",
+    "@solana/spl-token": "^0.4.15"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.10",
+    "chai": "^4.3.4",
+    "mocha": "^11.8.0",
+    "prettier": "^2.6.2",
+    "tsx": "^4.23.13",
+    "typescript": "^5.7.3"
+  }
+}
