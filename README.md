@@ -5,13 +5,16 @@
 - **PT (Principal Token):** the claim on the share itself.
 - **YT (Yield Token):** the right to the share's dividends.
 
-Holders can keep, sell or hedge each part separately, and a PT + YT pair always redeems for the original stock.
+Holders can keep, sell or hedge each part separately, and a PT + YT pair always redeems for the original stock. A built-in on-chain offer book lets anyone sell future dividends for USDC today, or buy them.
 
 Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.com/hackathons/stocklana) (Credit & Yield track).
 
-## Why it matters
+## Who it's for
 
-Stocks are coming on-chain as SPL tokens (for example xStocks), but a share's income still can't be separated from its principal. Stripr gives dividends their own token, much as Pendle does for DeFi yield. An income investor can buy only the dividends, and a long-term holder can sell future dividends today.
+Stocks are coming on-chain as SPL tokens (for example xStocks), but a share's income still can't be separated from its principal. Stripr gives dividends their own token, much as Pendle does for DeFi yield, and a place to trade it.
+
+- **Long-term holders.** They believe in the company but would rather have cash now than small payouts over years. With Stripr they strip their AAPLx, keep PT-AAPL for the share, and sell YT-AAPL for USDC in one transaction.
+- **Income investors.** They want dividends without paying for the whole share or riding its price swings. With Stripr they buy YT-AAPL from holders for a fraction of the share price, lock it in the same transaction, and collect every dividend.
 
 ## How it works
 
@@ -20,8 +23,9 @@ Stocks are coming on-chain as SPL tokens (for example xStocks), but a share's in
 3. **Earn from two sources:**
    - **Reinvested dividends.** xStocks pay dividends by raising the token's Token-2022 *Scaled UI Amount* multiplier, so the vault needs fewer raw tokens to back the same shares. Stripr releases that surplus to locked YT, paid in the stock itself.
    - **Cash dividends.** A market admin can deposit a cash payout (e.g. USDC), which is split pro-rata across locked YT.
-4. **Claim** earned stock and cash at any time, including after unlocking.
-5. **Redeem** equal PT + YT for the stock at the current multiplier.
+4. **Trade.** List PT or YT at a fixed USDC price. Buyers fill all or part of a listing on-chain, and YT buyers can lock in the same transaction.
+5. **Claim** earned stock and cash at any time, including after unlocking or selling your YT.
+6. **Redeem** equal PT + YT for the stock at the current multiplier.
 
 ### Accounting guarantees
 
@@ -46,7 +50,7 @@ The demo stocks are Token-2022 mints with the Scaled UI Amount extension, seeded
 
 ## Program
 
-A single Anchor program (`programs/stripr`) with nine instructions:
+A single Anchor program (`programs/stripr`) with twelve instructions:
 
 | Instruction | Who | What it does |
 |---|---|---|
@@ -58,6 +62,11 @@ A single Anchor program (`programs/stripr`) with nine instructions:
 | `claim_yield` | YT holder | Pays unclaimed cash dividends |
 | `sync_multiplier` | Anyone | Releases reinvested dividends after the stock's multiplier rises |
 | `claim_stock_yield` | YT holder | Pays unclaimed reinvested stock |
+| `create_offer` | PT/YT holder | Escrows PT or YT for sale at a fixed price in the market's quote token (USDC) |
+| `fill_offer` | Anyone | Buys all or part of an offer, paying the seller directly |
+| `cancel_offer` | Seller | Returns unsold tokens and closes the offer |
+
+Fills must pass the price the buyer saw, so a relisted offer at a new price can't overcharge anyone. Costs round up in the seller's favor, and a sold-out offer closes and refunds its rent.
 
 Works with classic SPL tokens and Token-2022 mints, including the extensions xStocks use: ScaledUiAmount, Pausable, PermanentDelegate and TransferHook.
 
@@ -71,6 +80,7 @@ A Next.js 14 app (`app/`):
   - Strip, redeem and earn forms.
   - Your position.
   - Analytics rebuilt from on-chain events: supply, reinvested and cash dividends, and recent activity.
+- **Trade section:** on each market page, an order book for PT and YT with best prices, lifetime dividends per YT, one-transaction "list" (unlocking first if needed) and "buy & lock", and cancelling your own listings.
 - **Transaction modal:** every action walks through each step and ends with an explorer link.
 - **Network switch:** toggles Devnet and Mainnet. A server-side RPC proxy is used because public mainnet RPC blocks browser requests.
 
@@ -98,8 +108,8 @@ docs/              Mainnet xStocks research notes
 ```bash
 npm install
 npm run build:program      # anchor build (SBPF v2)
-npm run test:program       # 11 end-to-end tests on a local validator
-cargo test -p stripr       # accounting unit tests
+npm run test:program       # 19 end-to-end tests on a local validator
+cargo test -p stripr       # 8 accounting unit tests
 npm run idl:sync           # copy the IDL and types into the app
 ```
 
@@ -119,12 +129,23 @@ See [`app/.env.example`](app/.env.example) for network, RPC and faucet settings.
 ```bash
 npm run deploy:devnet
 ROUNDS=3 ROUND_DELAY_SECONDS=45 npm run seed:devnet    # five markets with dividend history
+npm run seed:offers:devnet                             # PT/YT listings and a sale in every market
 SYMBOL=AAPL RATE=0.005 npm run reinvest:devnet         # pay a reinvested dividend live
 ```
+
+## Built with
+
+Stripr's program and app are original work for this hackathon, built on these open-source projects:
+
+- [Anchor](https://github.com/solana-foundation/anchor) and [Agave](https://github.com/anza-xyz/agave) for the on-chain program
+- [SPL Token and Token-2022](https://github.com/solana-program) with `@solana/spl-token` and `@solana/web3.js`
+- [Solana Wallet Adapter](https://github.com/anza-xyz/wallet-adapter)
+- [Next.js](https://nextjs.org), [React](https://react.dev), [TanStack Query](https://tanstack.com/query), [Tailwind CSS](https://tailwindcss.com) and [Lucide](https://lucide.dev) icons
+- [Mocha](https://mochajs.org), [Chai](https://www.chaijs.com) and [tsx](https://tsx.is) for tests
 
 ## Known limitations
 
 - **Not audited.** This is a hackathon build. Don't use it with meaningful real assets.
 - **Issuer controls.** xStocks issuers can pause transfers and move tokens from any account through a permanent delegate, including Stripr's vaults.
 - **Dividend timing.** Yield goes to whoever holds locked YT when a multiplier update is synced, so someone can lock just before a known update.
-- **No maturities or AMM yet.** PT and YT don't expire, and there's no PT/YT market for pricing yield. Both are on the roadmap.
+- **Fixed-price offers, not an AMM.** Prices come from sellers' listings, so thin markets can have wide spreads. PT and YT don't expire yet. Maturity-dated series and a PT/YT AMM are on the roadmap.
