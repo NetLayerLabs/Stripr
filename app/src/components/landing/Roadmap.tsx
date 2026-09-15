@@ -13,6 +13,7 @@ const PHASES: Array<{ phase: string; title: string; items: Array<{ status: Statu
       { status: "done", text: "O(1) pro-rata dividend index with unit-tested solvency" },
       { status: "done", text: "Web app with wallet connect, live positions and admin payouts" },
       { status: "done", text: "YT earns reinvested dividends from the xStocks Scaled UI Amount multiplier" },
+      { status: "done", text: "On-chain offer book to sell future dividends (YT) or principal (PT) for USDC" },
       { status: "done", text: "End-to-end tests with a real AAPLx market and an xStock-like Token-2022 mint" },
       { status: "done", text: "Devnet markets with on-chain analytics and a test-token faucet" },
     ],

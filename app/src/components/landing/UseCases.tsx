@@ -4,16 +4,16 @@ import { Section } from "./Section";
 const PERSONAS = [
   {
     icon: Wallet,
-    who: "Income seekers",
-    need: "Want a stock’s dividends without riding its daily price swings.",
-    strategy: "Hold and lock YT-AAPL to collect every payout in USDC.",
+    who: "Income investors",
+    need: "Want a stock’s dividends without paying for the whole share or riding its price swings.",
+    strategy: "Buy YT-AAPL from holders in the app for a fraction of the share price, lock it, and collect every dividend.",
     tone: "text-emerald-300",
   },
   {
     icon: Landmark,
     who: "Long-term holders",
-    need: "Believe in the company and don’t need the income stream.",
-    strategy: "Keep PT-AAPL for the share and pass the YT to someone who values the income.",
+    need: "Believe in the company, but would rather have cash now than small payouts over years.",
+    strategy: "Strip, keep PT-AAPL for the share, and sell the YT for USDC today. Selling future dividends takes one transaction.",
     tone: "text-sky-300",
   },
   {

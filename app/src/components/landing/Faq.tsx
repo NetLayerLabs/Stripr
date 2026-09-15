@@ -15,6 +15,10 @@ const QUESTIONS = [
     a: "Two sources. xStocks reinvest dividends by raising the token’s Scaled UI Amount multiplier, so each vault needs fewer raw tokens to back the same shares. Stripr releases that surplus to locked YT as extra stock. Any cash payout, such as USDC deposited by the market admin, is split across locked YT too.",
   },
   {
+    q: "Can I sell my future dividends?",
+    a: "Yes. List your YT at a USDC price in the market’s Trade section; it sits in an on-chain escrow until someone buys it or you cancel. You keep your PT, and dividends your YT already earned stay claimable. Buyers can lock the YT they buy in the same transaction.",
+  },
+  {
     q: "Do I need to lock YT to earn?",
     a: "Yes. Only locked YT earns. The app can lock new YT in the same transaction as the strip, and you can unlock at any time. Anything already earned stays claimable after you unlock.",
   },
