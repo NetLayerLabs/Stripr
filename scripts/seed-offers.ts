@@ -171,15 +171,18 @@ async function main() {
       .sort((a, b) => a.account.price.cmp(b.account.price))[0];
 
     if (cheapest && !alreadyBought) {
-      const buyerUsdc = await getOrCreateAssociatedTokenAccount(
-        connection,
-        admin,
-        account.dividendMint,
-        buyer.publicKey,
-        false,
-        "confirmed",
-        undefined,
-        usdcProgram
+      // A freshly created account can briefly read as missing on public RPC, so retry.
+      const buyerUsdc = await withRetry("buyer USDC account", () =>
+        getOrCreateAssociatedTokenAccount(
+          connection,
+          admin,
+          account.dividendMint,
+          buyer.publicKey,
+          false,
+          "confirmed",
+          { commitment: "confirmed" },
+          usdcProgram
+        )
       );
       if (buyerUsdc.amount < BigInt(BUYER_USDC) * 1_000_000n) {
         await withRetry("fund buyer USDC", () =>
