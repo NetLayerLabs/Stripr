@@ -80,7 +80,7 @@ export function SplitDiagram() {
           kind="yt"
           symbol="YT-AAPL"
           role="Yield"
-          detail="Collects every USDC dividend while locked."
+          detail="Earns every dividend while locked, or sell it for USDC."
         />
       </div>
 
