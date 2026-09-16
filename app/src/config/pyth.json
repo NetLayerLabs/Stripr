@@ -1,0 +1,16 @@
+{
+  "comment": "Pyth equity price feeds used as reference prices for each market's stock symbol. 'market' is the US market-hours feed (Equity.US.*); 'roundTheClock' is Pyth's 24/7 index feed (Equity.Index.*) where one exists, so prices still show outside trading hours.",
+  "feeds": {
+    "AAPL": {
+      "market": "49f6b65cb1de6b10eaf75e7c03ca029c306d0357e91b5311b175084a5ad55688",
+      "roundTheClock": "aaba35e6f33fb973bb2201d48a79ae24795affa6ba8bd50a93dcaf7da0030f36"
+    },
+    "MSFT": {
+      "market": "d0ca23c1cc005e004ccf1db5bf76aeb6a49218f43dac3d4b275e92de12ded4d1",
+      "roundTheClock": "d9144b30a3a162a2748d384dc53387571f3ec77b9edfe31739349396ed67a63a"
+    },
+    "JNJ": { "market": "12848738d5db3aef52f51d78d98fc8b8b8450ffb19fb3aeeb67d38f8c147ff63" },
+    "KO": { "market": "9aa471dccea36b90703325225ac76189baf7e0cc286b8843de1de4f31f9caa7d" },
+    "PG": { "market": "ad2fda41998f4e7be99a2a7b27273bd16f183d9adfc014a4f5e5d3d6cd519bf4" }
+  }
+}

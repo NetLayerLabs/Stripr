@@ -57,6 +57,7 @@ Tokenized stocks like xStocks already trade on Solana. But a share's two parts a
   - Markets dashboard.
   - Market pages with strip, redeem, earn and trade.
   - On-chain analytics: supply, reinvested and cash dividends, and activity.
+  - Pyth equity price feeds, so every PT and YT listing is priced against the stock's live share price, using Pyth's 24/7 feeds when US markets are closed. Enabled by an API key with US equity entitlement; without one the app hides these panels.
   - A transaction modal with explorer links.
   - A Devnet/Mainnet switch.
   - A live mainnet AAPLx data panel on the landing page.

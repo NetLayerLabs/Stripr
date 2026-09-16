@@ -4,9 +4,17 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useMemo, useState } from "react";
 import { Note, Row, Segmented, StatTile, Toggle, TokenIcon } from "@/components/ui";
 import { useOffers } from "@/hooks/useOffers";
+import { usePrices } from "@/hooks/usePrices";
 import type { StriprActions } from "@/hooks/useStriprActions";
 import { cn } from "@/lib/cn";
 import { formatAmount, parseAmount, pow10, shortAddress } from "@/lib/format";
+import {
+  formatPercent,
+  formatUsd,
+  shareOfStockPrice,
+  splitVsStock,
+  type StockPrice,
+} from "@/lib/prices";
 import {
   ACC_PRECISION,
   dividendPerYt,
@@ -38,6 +46,13 @@ const MODES = [
 
 const tokenSymbol = (market: MarketView, asset: OfferAsset) => `${asset.toUpperCase()}-${market.symbol}`;
 
+/** Where a Pyth reference price came from: live, last close, or the 24/7 feed. */
+function priceNote(stock: StockPrice) {
+  if (stock.roundTheClock) return "Pyth · 24/7 feed";
+  if (stock.marketOpen === false) return "Pyth · at last close";
+  return "Pyth · live";
+}
+
 export function TradePanel({ market, position, actions }: Props) {
   const offers = useOffers(market);
   const { publicKey } = useWallet();
@@ -45,6 +60,8 @@ export function TradePanel({ market, position, actions }: Props) {
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [selected, setSelected] = useState<string | null>(null);
 
+  const prices = usePrices();
+  const stock = prices.data?.enabled ? prices.data.prices[market.symbol] : undefined;
   const all = useMemo(() => offers.data ?? [], [offers.data]);
   const book = useMemo(() => all.filter((offer) => offer.asset === asset), [all, asset]);
   const isOwn = (offer: OfferView) => Boolean(publicKey && offer.maker.equals(publicKey));
@@ -56,6 +73,11 @@ export function TradePanel({ market, position, actions }: Props) {
   const bestYt = all.find((offer) => offer.asset === "yt");
   const price = (offer: OfferView | undefined) =>
     offer ? `${formatAmount(offer.price, quoteDecimals, 2)} ${market.dividendSymbol}` : "—";
+  const shareSub = (offer: OfferView | undefined, fallback: string) => {
+    const percent = offer ? shareOfStockPrice(market, offer.price, stock) : null;
+    return percent === null ? fallback : `${formatPercent(percent)} of the share price`;
+  };
+  const split = splitVsStock(market, all, stock);
 
   // What one whole YT has earned over the market's life, as context for its price.
   const cashPerYt = dividendPerYt(market);
@@ -76,6 +98,14 @@ export function TradePanel({ market, position, actions }: Props) {
             Sell your future dividends for {market.dividendSymbol} today, or buy someone else’s. Settled on-chain,
             no intermediary.
           </p>
+          {split ? (
+            <p className="mt-1.5 text-xs text-zinc-500">
+              Cheapest PT + YT together: {formatUsd(split.combined)} ·{" "}
+              <span className={split.percentOfStock <= 100 ? "text-emerald-300" : "text-amber-300"}>
+                {formatPercent(split.percentOfStock)} of one {market.symbol} share
+              </span>
+            </p>
+          ) : null}
         </div>
         <Segmented
           options={ASSETS}
@@ -88,13 +118,21 @@ export function TradePanel({ market, position, actions }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        <StatTile label="Best YT price" value={price(bestYt)} sub="Future dividends, per share" />
-        <StatTile label="Best PT price" value={price(bestPt)} sub="The share without dividends" />
-        <StatTile
-          label="Open listings"
-          value={offers.isPending ? "—" : all.length}
-          sub={`${all.filter((offer) => offer.asset === "yt").length} YT · ${all.filter((offer) => offer.asset === "pt").length} PT`}
-        />
+        {stock ? (
+          <StatTile
+            label={`${market.symbol} reference price`}
+            value={formatUsd(stock.price)}
+            sub={priceNote(stock)}
+          />
+        ) : (
+          <StatTile
+            label="Open listings"
+            value={offers.isPending ? "—" : all.length}
+            sub={`${all.filter((offer) => offer.asset === "yt").length} YT · ${all.filter((offer) => offer.asset === "pt").length} PT`}
+          />
+        )}
+        <StatTile label="Best YT price" value={price(bestYt)} sub={shareSub(bestYt, "Future dividends, per share")} />
+        <StatTile label="Best PT price" value={price(bestPt)} sub={shareSub(bestPt, "The share without dividends")} />
         <StatTile
           label="Paid per YT so far"
           value={earnedParts.length ? earnedParts.join(" + ") : "—"}
@@ -107,6 +145,7 @@ export function TradePanel({ market, position, actions }: Props) {
           market={market}
           asset={asset}
           offers={book}
+          stock={stock}
           loading={offers.isPending}
           chosen={chosen}
           isOwn={isOwn}
@@ -129,10 +168,11 @@ export function TradePanel({ market, position, actions }: Props) {
                 actions={actions}
                 asset={asset}
                 offer={chosen}
+                stock={stock}
                 own={chosen ? isOwn(chosen) : false}
               />
             ) : (
-              <SellForm key={asset} market={market} position={position} actions={actions} asset={asset} />
+              <SellForm key={asset} market={market} position={position} actions={actions} asset={asset} stock={stock} />
             )}
           </div>
         </div>
@@ -145,6 +185,7 @@ function OrderBook({
   market,
   asset,
   offers,
+  stock,
   loading,
   chosen,
   isOwn,
@@ -155,6 +196,7 @@ function OrderBook({
   market: MarketView;
   asset: OfferAsset;
   offers: OfferView[];
+  stock: StockPrice | undefined;
   loading: boolean;
   chosen: OfferView | undefined;
   isOwn: (offer: OfferView) => boolean;
@@ -173,7 +215,9 @@ function OrderBook({
           <TokenIcon kind={asset} symbol={market.symbol} size="sm" />
           {symbol} for sale
         </h3>
-        <span className="text-xs text-zinc-500">Cheapest first</span>
+        <span className="text-xs text-zinc-500">
+          {offers.length > 0 ? `${offers.length} listed · cheapest first` : "Cheapest first"}
+        </span>
       </div>
       {offers.length === 0 ? (
         <p className="px-6 py-12 text-center text-sm text-zinc-500">
@@ -185,6 +229,7 @@ function OrderBook({
             <thead>
               <tr className="text-left">
                 <th className="label px-5 py-3 font-medium sm:px-6">Price</th>
+                {stock ? <th className="label px-5 py-3 text-right font-medium">% of share</th> : null}
                 <th className="label px-5 py-3 text-right font-medium">Available</th>
                 <th className="label px-5 py-3 text-right font-medium">Total</th>
                 <th className="label px-5 py-3 font-medium">Seller</th>
@@ -200,6 +245,14 @@ function OrderBook({
                     <td className="num px-5 py-3 font-medium text-white sm:px-6">
                       {formatAmount(offer.price, quoteDecimals, 2)} {market.dividendSymbol}
                     </td>
+                    {stock ? (
+                      <td className="num px-5 py-3 text-right text-zinc-400">
+                        {(() => {
+                          const percent = shareOfStockPrice(market, offer.price, stock);
+                          return percent === null ? "—" : formatPercent(percent);
+                        })()}
+                      </td>
+                    ) : null}
                     <td className="num px-5 py-3 text-right text-zinc-200">{formatAmount(offer.amount, decimals, 2)}</td>
                     <td className="num px-5 py-3 text-right text-zinc-400">
                       {formatAmount(offerCost(offer.price, offer.amount, decimals), quoteDecimals, 2)}
@@ -250,8 +303,9 @@ function BuyForm({
   actions,
   asset,
   offer,
+  stock,
   own,
-}: Props & { asset: OfferAsset; offer: OfferView | undefined; own: boolean }) {
+}: Props & { asset: OfferAsset; offer: OfferView | undefined; stock: StockPrice | undefined; own: boolean }) {
   const [value, setValue] = useState("");
   const [lock, setLock] = useState(true);
   const { decimals } = market.underlying;
@@ -292,6 +346,15 @@ function BuyForm({
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <Row label="Price" value={`${formatAmount(offer.price, market.dividend.decimals, 2)} ${market.dividendSymbol}`} />
         <Row label="You pay" value={`${formatAmount(cost, market.dividend.decimals, 2)} ${market.dividendSymbol}`} />
+        {stock ? (
+          <Row
+            label={`Share of the ${market.symbol} price`}
+            value={(() => {
+              const percent = shareOfStockPrice(market, offer.price, stock);
+              return percent === null ? "—" : formatPercent(percent);
+            })()}
+          />
+        ) : null}
         <Row
           label={`Your ${market.dividendSymbol}`}
           value={position ? formatAmount(position.dividend, market.dividend.decimals, 2) : "—"}
@@ -322,7 +385,13 @@ function BuyForm({
   );
 }
 
-function SellForm({ market, position, actions, asset }: Props & { asset: OfferAsset }) {
+function SellForm({
+  market,
+  position,
+  actions,
+  asset,
+  stock,
+}: Props & { asset: OfferAsset; stock: StockPrice | undefined }) {
   const [value, setValue] = useState("");
   const [priceValue, setPriceValue] = useState("");
   const { decimals } = market.underlying;
@@ -364,6 +433,15 @@ function SellForm({ market, position, actions, asset }: Props & { asset: OfferAs
       />
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <Row label="You receive when it sells" value={`${formatAmount(proceeds, quoteDecimals, 2)} ${market.dividendSymbol}`} />
+        {stock && price ? (
+          <Row
+            label={`Your price vs the ${market.symbol} share`}
+            value={(() => {
+              const percent = shareOfStockPrice(market, price, stock);
+              return percent === null ? "—" : `${formatPercent(percent)} (${formatUsd(stock.price)} share)`;
+            })()}
+          />
+        ) : null}
         {unlockFirst > 0n ? <Row label="Unlocked first" value={formatAmount(unlockFirst, decimals, 2)} /> : null}
         <Row label="Fees" value="None" />
       </div>
