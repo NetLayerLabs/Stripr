@@ -32,7 +32,28 @@ const MIN_WALLET_SOL = 0.05;
 const TOP_UP_SOL = 0.08;
 const BUYER_USDC = 5_000;
 
+// Static fallbacks only; listings are priced against the live stock price when Jupiter answers.
 const REFERENCE_PRICES: Record<string, number> = { AAPL: 230, MSFT: 420, JNJ: 160, KO: 70, PG: 170 };
+const PRICES_CONFIG = path.join(__dirname, "../app/src/config/pyth.json");
+
+/** Live stock price from Jupiter for the symbol's xStock twin, falling back to the static reference. */
+async function referencePrice(symbol: string): Promise<number | undefined> {
+  try {
+    const feeds = (JSON.parse(readFileSync(PRICES_CONFIG, "utf8")) as { feeds: Record<string, { xstock?: string }> }).feeds;
+    const mint = feeds[symbol]?.xstock;
+    if (mint) {
+      const response = await fetch(`https://lite-api.jup.ag/price/v3?ids=${mint}`);
+      if (response.ok) {
+        const body = (await response.json()) as Record<string, { usdPrice?: number; stockData?: { price?: number } }>;
+        const price = body[mint]?.stockData?.price ?? body[mint]?.usdPrice;
+        if (price && price > 0) return price;
+      }
+    }
+  } catch {
+    // Fall through to the static reference.
+  }
+  return REFERENCE_PRICES[symbol];
+}
 
 // Wallet index, token, price as a share of the reference share price, whole tokens listed.
 const LISTINGS: Array<{ wallet: number; asset: "pt" | "yt"; ofPrice: number; tokens: number }> = [
@@ -108,21 +129,55 @@ async function main() {
     }
   }
 
-  const markets = await program.account.market.all([{ dataSize: program.account.market.size }]);
+  // SYMBOLS=PG,MSFT limits the run to some markets.
+  const only = process.env.SYMBOLS?.split(",").map((s) => s.trim()).filter(Boolean);
+  const markets = await withRetry("list markets", () =>
+    program.account.market.all([{ dataSize: program.account.market.size }])
+  );
   for (const { publicKey: market, account } of markets) {
     const symbol = tokens[account.underlyingMint.toBase58()]?.symbol;
-    const reference = symbol ? REFERENCE_PRICES[symbol] : undefined;
+    if (only && (!symbol || !only.includes(symbol))) continue;
+    const reference = symbol ? await referencePrice(symbol) : undefined;
     if (!symbol || !reference) continue;
+    console.log(`${symbol}: pricing against ${reference.toFixed(2)} per share`);
 
-    const mintInfo = await connection.getAccountInfo(account.underlyingMint);
+    const mintInfo = await withRetry(`read ${symbol} mint`, () => connection.getAccountInfo(account.underlyingMint));
     if (!mintInfo?.owner.equals(TOKEN_2022_PROGRAM_ID)) continue;
     const tokenProgram = mintInfo.owner;
-    const usdcProgram = (await connection.getAccountInfo(account.dividendMint))!.owner;
-    const existing = await program.account.offer.all([
-      { dataSize: program.account.offer.size },
-      { memcmp: { offset: 8 + 32, bytes: market.toBase58() } },
-    ]);
+    const usdcProgram = (await withRetry("read USDC mint", () => connection.getAccountInfo(account.dividendMint)))!.owner;
+    const existing = await withRetry(`list ${symbol} offers`, () =>
+      program.account.offer.all([
+        { dataSize: program.account.offer.size },
+        { memcmp: { offset: 8 + 32, bytes: market.toBase58() } },
+      ])
+    );
     const STOCK_UNIT = 10n ** 8n;
+
+    // REPRICE=1 cancels the demo wallets' listings first so they're re-listed at today's price.
+    if (process.env.REPRICE === "1") {
+      for (const { publicKey: offer, account: open } of existing) {
+        const maker = wallets.find((wallet) => wallet.publicKey.equals(open.maker));
+        if (!maker) continue;
+        // A retry can follow a cancel that already landed, so treat a closed offer as done.
+        await withRetry(`cancel ${symbol} listing`, async () => {
+          if (!(await program.account.offer.fetchNullable(offer))) return;
+          await program.methods
+            .cancelOffer()
+            .accountsPartial({
+              maker: maker.publicKey,
+              market,
+              offer,
+              tokenMint: open.tokenMint,
+              escrow: pda(Buffer.from("offer_escrow"), offer.toBuffer()),
+              makerToken: ata(open.tokenMint, maker.publicKey, tokenProgram),
+              tokenProgram,
+            })
+            .signers([maker])
+            .rpc();
+        });
+      }
+      existing.length = 0;
+    }
 
     for (const [index, listing] of LISTINGS.entries()) {
       const maker = wallets[listing.wallet];
@@ -161,10 +216,12 @@ async function main() {
 
     // The buyer takes part of the cheapest YT listing once, then locks it to earn.
     const buyer = wallets[BUYER];
-    const offers = await program.account.offer.all([
-      { dataSize: program.account.offer.size },
-      { memcmp: { offset: 8 + 32, bytes: market.toBase58() } },
-    ]);
+    const offers = await withRetry(`list ${symbol} offers`, () =>
+      program.account.offer.all([
+        { dataSize: program.account.offer.size },
+        { memcmp: { offset: 8 + 32, bytes: market.toBase58() } },
+      ])
+    );
     const alreadyBought = offers.some(({ account: offer }) => offer.amount.lt(offer.initialAmount));
     const cheapest = offers
       .filter(({ account: offer }) => offer.tokenMint.equals(account.ytMint) && !offer.maker.equals(buyer.publicKey))
@@ -227,6 +284,7 @@ async function main() {
       );
     }
     console.log(`Order book ready in ${symbol}`);
+    await sleep(3); // stay under the public RPC's per-method rate limit
   }
 
   const remaining = await connection.getBalance(admin.publicKey);
