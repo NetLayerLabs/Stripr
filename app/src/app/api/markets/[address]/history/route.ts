@@ -29,7 +29,8 @@ export type MarketEvent = {
 type Snapshot = Record<string, { newestSignature: string; events: MarketEvent[] }>;
 // Committed by scripts/snapshot-history.ts: charts paint from this at once, and only
 // transactions newer than each market's snapshot are fetched from the RPC.
-const SNAPSHOTS: Partial<Record<Cluster, Snapshot>> = { devnet: devnetSnapshot as Snapshot };
+// The JSON import is typed from its current contents; the snapshot shape is what matters.
+const SNAPSHOTS: Partial<Record<Cluster, Snapshot>> = { devnet: devnetSnapshot as unknown as Snapshot };
 
 // Confirmed transactions never change, so decoded events are cached per signature;
 // an interrupted load resumes where it stopped on the next request.
