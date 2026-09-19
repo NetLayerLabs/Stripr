@@ -101,7 +101,7 @@ export function MarketStats({ market }: { market: MarketView }) {
         value={formatAmount(market.totalDividends, dividendDecimals, 2)}
         sub={
           cluster === "devnet"
-            ? `Demo ${market.dividendSymbol} paid to locked YT · real xStocks only reinvest`
+            ? `Demo ${market.dividendSymbol} to locked YT · demo-only`
             : `${market.dividendSymbol} paid to locked YT`
         }
       />

@@ -11,6 +11,8 @@ import { formatAmount, parseAmount, pow10, shortAddress } from "@/lib/format";
 import {
   formatPercent,
   formatUsd,
+  paidPerYtUsd,
+  paybackPercent,
   shareOfStockPrice,
   splitVsStock,
   type StockPrice,
@@ -87,6 +89,7 @@ export function TradePanel({ market, position, actions }: Props) {
     cashPerYt > 0n ? `${formatAmount(cashPerYt, quoteDecimals, 2)} ${market.dividendSymbol}` : null,
     stockPerYt > 0n ? `${formatAmount(stockPerYt, market.underlying.decimals, 4)} ${market.symbol}` : null,
   ].filter(Boolean);
+  const paidUsd = paidPerYtUsd(market, cashPerYt, stockPerYt, stock);
 
   return (
     <section aria-labelledby="trade-heading" className="space-y-4">
@@ -137,7 +140,7 @@ export function TradePanel({ market, position, actions }: Props) {
         <StatTile
           label="Paid per YT so far"
           value={earnedParts.length ? earnedParts.join(" + ") : "—"}
-          sub="Lifetime dividends per share"
+          sub={paidUsd !== null && paidUsd > 0 ? `≈ ${formatUsd(paidUsd)} per YT at the reference price` : "Lifetime dividends per share"}
         />
       </div>
 
@@ -170,10 +173,19 @@ export function TradePanel({ market, position, actions }: Props) {
                 asset={asset}
                 offer={chosen}
                 stock={stock}
+                paidUsd={paidUsd}
                 own={chosen ? isOwn(chosen) : false}
               />
             ) : (
-              <SellForm key={asset} market={market} position={position} actions={actions} asset={asset} stock={stock} />
+              <SellForm
+                key={asset}
+                market={market}
+                position={position}
+                actions={actions}
+                asset={asset}
+                stock={stock}
+                paidUsd={paidUsd}
+              />
             )}
           </div>
         </div>
@@ -305,8 +317,15 @@ function BuyForm({
   asset,
   offer,
   stock,
+  paidUsd,
   own,
-}: Props & { asset: OfferAsset; offer: OfferView | undefined; stock: StockPrice | undefined; own: boolean }) {
+}: Props & {
+  asset: OfferAsset;
+  offer: OfferView | undefined;
+  stock: StockPrice | undefined;
+  paidUsd: number | null;
+  own: boolean;
+}) {
   const [value, setValue] = useState("");
   const [lock, setLock] = useState(true);
   const { decimals } = market.underlying;
@@ -347,6 +366,12 @@ function BuyForm({
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <Row label="Price" value={`${formatAmount(offer.price, market.dividend.decimals, 2)} ${market.dividendSymbol}`} />
         <Row label="You pay" value={`${formatAmount(cost, market.dividend.decimals, 2)} ${market.dividendSymbol}`} />
+        {asset === "yt" && paidUsd !== null && paidUsd > 0 ? (
+          <Row
+            label="Paid so far per YT"
+            value={`${formatUsd(paidUsd)} · ${formatPercent(paybackPercent(market, offer.price, paidUsd) ?? 0)} of price`}
+          />
+        ) : null}
         {stock ? (
           <Row
             label={`Share of the ${market.symbol} price`}
@@ -392,7 +417,8 @@ function SellForm({
   actions,
   asset,
   stock,
-}: Props & { asset: OfferAsset; stock: StockPrice | undefined }) {
+  paidUsd,
+}: Props & { asset: OfferAsset; stock: StockPrice | undefined; paidUsd: number | null }) {
   const [value, setValue] = useState("");
   const [priceValue, setPriceValue] = useState("");
   const { decimals } = market.underlying;
@@ -434,6 +460,12 @@ function SellForm({
       />
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <Row label="You receive when it sells" value={`${formatAmount(proceeds, quoteDecimals, 2)} ${market.dividendSymbol}`} />
+        {asset === "yt" && price && paidUsd !== null && paidUsd > 0 ? (
+          <Row
+            label="Paid so far per YT"
+            value={`${formatUsd(paidUsd)} · ${formatPercent(paybackPercent(market, price, paidUsd) ?? 0)} of price`}
+          />
+        ) : null}
         {stock && price ? (
           <Row
             label={`Your price vs the ${market.symbol} share`}

@@ -21,6 +21,27 @@ export function shareOfStockPrice(market: MarketView, price: bigint, stock: Stoc
 export const cashPaidPerYtUsd = (market: MarketView, cashPerYt: bigint) =>
   Number(cashPerYt) / Number(pow10(market.dividend.decimals));
 
+/**
+ * What one whole YT has paid over the market's life, in USD: cash dividends plus
+ * reinvested stock valued at the reference price. Null without a reference price.
+ */
+export function paidPerYtUsd(
+  market: MarketView,
+  cashPerYt: bigint,
+  stockPerYtShares: bigint,
+  stock: StockPrice | undefined
+): number | null {
+  if (!stock || stock.price <= 0) return null;
+  const stockValue = (Number(stockPerYtShares) / Number(pow10(market.underlying.decimals))) * stock.price;
+  return cashPaidPerYtUsd(market, cashPerYt) + stockValue;
+}
+
+/** Lifetime payout as a percentage of a listing price: how much of the price is already "paid back". */
+export function paybackPercent(market: MarketView, price: bigint, paidUsd: number | null): number | null {
+  if (paidUsd === null || price <= 0n) return null;
+  return (paidUsd / offerPriceUsd(market, price)) * 100;
+}
+
 /** The cheapest listing of an asset, if any. */
 export const bestOffer = (offers: OfferView[], asset: "pt" | "yt") =>
   offers.find((offer) => offer.asset === asset);
