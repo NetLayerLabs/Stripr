@@ -15,7 +15,8 @@
     "seed:offers:devnet": "anchor run seed-offers --provider.cluster devnet",
     "deploy:mainnet": "ANCHOR_BUILD_SBF_ARCH=v2 anchor build && anchor program deploy -p stripr --no-idl --use-rpc --provider.cluster \"${MAINNET_RPC_URL:-mainnet}\" --provider.wallet ~/.config/solana/stripr-mainnet-deployer.json -- --with-compute-unit-price 50000 --max-sign-attempts 20",
     "reinvest:devnet": "anchor run reinvest-dividend --provider.cluster devnet",
-    "open:mainnet:markets": "anchor run open-mainnet-markets --provider.cluster \"${MAINNET_RPC_URL:-mainnet}\" --provider.wallet ~/.config/solana/stripr-mainnet-deployer.json"
+    "open:mainnet:markets": "anchor run open-mainnet-markets --provider.cluster \"${MAINNET_RPC_URL:-mainnet}\" --provider.wallet ~/.config/solana/stripr-mainnet-deployer.json",
+    "snapshot:devnet": "anchor run snapshot-history --provider.cluster devnet"
   },
   "dependencies": {
     "@anchor-lang/core": "^1.2.0",

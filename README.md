@@ -91,7 +91,7 @@ A Next.js 14 app (`app/`):
 programs/stripr/   Anchor program (state, instructions, multiplier sync, unit tests)
 tests/             End-to-end tests (classic mints, real AAPLx fixture, xStock-like Token-2022 mint)
 scripts/           Devnet demo setup, market seeding and a live reinvested-dividend trigger
-app/               Next.js frontend and API routes (market history, RPC proxy, faucet)
+app/               Next.js frontend and API routes (market history, RPC proxy, faucet, prices)
 docs/              Mainnet xStocks research notes
 ```
 
@@ -131,6 +131,7 @@ See [`app/.env.example`](app/.env.example) for network, RPC and faucet settings.
 npm run deploy:devnet
 ROUNDS=3 ROUND_DELAY_SECONDS=45 npm run seed:devnet    # five markets with dividend history
 npm run seed:offers:devnet                             # PT/YT listings and a sale in every market
+npm run snapshot:devnet                                # commit decoded history so charts paint instantly when hosted
 SYMBOL=AAPL RATE=0.005 npm run reinvest:devnet         # pay a reinvested dividend live
 ```
 

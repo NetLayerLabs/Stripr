@@ -32,6 +32,7 @@ Re-quote after any rebuild: `solana rent $(( $(stat -f %z target/deploy/stripr.s
 5. `solana program show --buffers --buffer-authority 3EGKfA8W2ocah3Gusox5JRfoN5WVAgXw9hubgyBGXvSy -u "$MAINNET_RPC_URL"` must be empty. If a deploy died mid-way: resume with `--buffer <keypair>` or reclaim rent with `solana program close --buffers -k ~/.config/solana/stripr-mainnet-deployer.json -u "$MAINNET_RPC_URL"`.
 6. **Immediately** open the real markets, before announcing the program (initialize_market is permissionless, so the addresses can be squatted): `DRY_RUN=1 npm run open:mainnet:markets` to review the plan, then `DRY_RUN=0 npm run open:mainnet:markets`.
 7. `npm run idl:sync`, set `NEXT_PUBLIC_SOLANA_CLUSTER`/`MAINNET_RPC_URL` for the hosted app, and update the landing copy that says mainnet is planned (Faq, AtAGlance, Roadmap).
+8. Before every app deploy: `npm run snapshot:devnet` (and a mainnet snapshot once markets have history) so the hosted charts paint from the committed snapshot instead of crawling the RPC.
 
 ## After the hackathon
 

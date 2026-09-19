@@ -3,6 +3,7 @@ import { Connection, PublicKey, type ConfirmedSignatureInfo } from "@solana/web3
 import { NextResponse } from "next/server";
 import { DEFAULT_CLUSTER, parseCluster, serverRpcUrl, type Cluster } from "@/lib/config";
 import { PROGRAM_ID, getProgram } from "@/lib/stripr";
+import devnetSnapshot from "@/config/history.devnet.json";
 
 export const dynamic = "force-dynamic";
 // Rebuilding history crawls many transactions; give a serverless host time to finish.
@@ -24,6 +25,11 @@ export type MarketEvent = {
   /** Event fields as strings (u64/u128 amounts stay exact). */
   data: Record<string, string>;
 };
+
+type Snapshot = Record<string, { newestSignature: string; events: MarketEvent[] }>;
+// Committed by scripts/snapshot-history.ts: charts paint from this at once, and only
+// transactions newer than each market's snapshot are fetched from the RPC.
+const SNAPSHOTS: Partial<Record<Cluster, Snapshot>> = { devnet: devnetSnapshot as Snapshot };
 
 // Confirmed transactions never change, so decoded events are cached per signature;
 // an interrupted load resumes where it stopped on the next request.
@@ -94,14 +100,17 @@ async function decodeTransaction(
 async function loadEvents(cluster: Cluster, market: PublicKey): Promise<MarketEvent[]> {
   const connection = new Connection(serverRpcUrl(cluster), "confirmed");
   const parser = new EventParser(PROGRAM_ID, getProgram(connection).coder);
+  const key = market.toBase58();
+  const snapshot = SNAPSHOTS[cluster]?.[key];
   const signatures = (
-    await withBackoff(() => connection.getSignaturesForAddress(market, { limit: SIGNATURE_LIMIT }))
+    await withBackoff(() =>
+      connection.getSignaturesForAddress(market, { limit: SIGNATURE_LIMIT, until: snapshot?.newestSignature })
+    )
   )
     .filter((signature) => !signature.err)
     .reverse(); // oldest first, so events within a slot keep their on-chain order
 
-  const key = market.toBase58();
-  const events: MarketEvent[] = [];
+  const events: MarketEvent[] = [...(snapshot?.events ?? [])];
   for (const signature of signatures) {
     for (const event of await decodeTransaction(cluster, connection, parser, signature)) {
       if (event.data.market === key) events.push(event);
