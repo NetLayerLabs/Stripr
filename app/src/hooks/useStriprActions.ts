@@ -1,10 +1,18 @@
 "use client";
 
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Transaction, type Connection, type PublicKey, type TransactionInstruction } from "@solana/web3.js";
+import {
+  ComputeBudgetProgram,
+  Transaction,
+  type Connection,
+  type PublicKey,
+  type TransactionInstruction,
+} from "@solana/web3.js";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
+import { useNetwork } from "@/components/NetworkProvider";
 import { useTransactionModal, type TxDetail } from "@/components/TransactionModal";
+import type { Cluster } from "@/lib/config";
 import { describeError } from "@/lib/errors";
 import { formatAmount } from "@/lib/format";
 import {
@@ -34,6 +42,7 @@ type Describe = (market: MarketView) => TxDetail[];
 const TRANSACTION_STEPS = ["Prepare transaction", "Approve in your wallet", "Confirm on Solana"];
 const FAUCET_STEPS = ["Request test tokens", "Confirm on Solana"];
 const FAUCET_AMOUNT = "100";
+const FAUCET_USDC = "1,000";
 
 /** A raw stock amount, shown in share units like wallets display it. */
 const stock = (market: MarketView, raw: bigint) =>
@@ -62,6 +71,28 @@ const lockInstruction = (program: StriprProgram, market: MarketView, user: Publi
 const unlockInstruction = (program: StriprProgram, market: MarketView, user: PublicKey, amount: bigint) =>
   program.methods.unlockYt(toBN(amount)).accountsPartial(ytAccounts(market, user)).instruction();
 
+const COMPUTE_UNIT_LIMIT = 600_000;
+const MIN_MAINNET_PRIORITY_MICROLAMPORTS = 1_000;
+
+/**
+ * A compute budget for every transaction: an explicit unit limit, and on mainnet a
+ * priority fee at the 75th percentile of recent fees so demos don't drop under load.
+ */
+async function computeBudgetInstructions(connection: Connection, cluster: Cluster): Promise<TransactionInstruction[]> {
+  const limit = ComputeBudgetProgram.setComputeUnitLimit({ units: COMPUTE_UNIT_LIMIT });
+  if (cluster !== "mainnet-beta") return [limit];
+  let microLamports = MIN_MAINNET_PRIORITY_MICROLAMPORTS;
+  try {
+    const fees = (await connection.getRecentPrioritizationFees())
+      .map((fee) => fee.prioritizationFee)
+      .sort((a, b) => a - b);
+    if (fees.length) microLamports = Math.max(microLamports, fees[Math.floor(fees.length * 0.75)]);
+  } catch {
+    // Fall back to the minimum; the transaction still carries a priority fee.
+  }
+  return [limit, ComputeBudgetProgram.setComputeUnitPrice({ microLamports })];
+}
+
 /**
  * Waits for a signature by polling its status. Public RPCs block browser websockets,
  * so this avoids the subscription that confirmTransaction opens.
@@ -84,6 +115,7 @@ export function useStriprActions(market: MarketView | undefined) {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
   const { sendTransaction } = useWallet();
+  const { cluster } = useNetwork();
   const queryClient = useQueryClient();
   const modal = useTransactionModal();
   const [busy, setBusy] = useState(false);
@@ -111,8 +143,9 @@ export function useStriprActions(market: MarketView | undefined) {
       try {
         const program = getProgram(connection, wallet);
         const instructions = await build(program, market, wallet.publicKey);
+        const budget = await computeBudgetInstructions(connection, cluster);
         const latest = await connection.getLatestBlockhash("confirmed");
-        const transaction = new Transaction({ feePayer: wallet.publicKey, ...latest }).add(...instructions);
+        const transaction = new Transaction({ feePayer: wallet.publicKey, ...latest }).add(...budget, ...instructions);
 
         modal.step(1);
         signature = await sendTransaction(transaction, connection);
@@ -130,17 +163,17 @@ export function useStriprActions(market: MarketView | undefined) {
         void refresh();
       }
     },
-    [connection, market, modal, refresh, sendTransaction, wallet]
+    [cluster, connection, market, modal, refresh, sendTransaction, wallet]
   );
 
   const requestFaucet = useCallback(async () => {
     if (!wallet || !market) return;
     setBusy(true);
     modal.start({
-      title: `Get test ${market.symbol}`,
+      title: `Get test ${market.symbol} and ${market.dividendSymbol}`,
       subtitle: "Devnet faucet",
       details: [
-        { label: "You receive", value: `${FAUCET_AMOUNT} ${market.symbol}` },
+        { label: "You receive", value: `${FAUCET_AMOUNT} ${market.symbol} + ${FAUCET_USDC} ${market.dividendSymbol}` },
         { label: "Network fees", value: "Devnet SOL top-up if you’re low" },
       ],
       steps: FAUCET_STEPS,

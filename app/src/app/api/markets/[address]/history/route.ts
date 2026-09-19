@@ -5,6 +5,9 @@ import { DEFAULT_CLUSTER, parseCluster, serverRpcUrl, type Cluster } from "@/lib
 import { PROGRAM_ID, getProgram } from "@/lib/stripr";
 
 export const dynamic = "force-dynamic";
+// Rebuilding history crawls many transactions; give a serverless host time to finish.
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const SIGNATURE_LIMIT = 500;
 // Public RPCs allow ~40 getTransaction calls per 10s per IP, so every lookup

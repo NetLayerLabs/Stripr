@@ -46,7 +46,7 @@ Stocks are coming on-chain as SPL tokens (for example xStocks), but a share's in
 | KO market (cash dividends) | [`3vjNhamX7jEbkttwD3igm21ScDC6PVrF7JLEakcdxgSe`](https://explorer.solana.com/address/3vjNhamX7jEbkttwD3igm21ScDC6PVrF7JLEakcdxgSe?cluster=devnet) |
 | PG market (both) | [`67YC3kn27N1K84N4KE1HeR33ccqqEywn7NKVWYPDwygX`](https://explorer.solana.com/address/67YC3kn27N1K84N4KE1HeR33ccqqEywn7NKVWYPDwygX?cluster=devnet) |
 
-The demo stocks are Token-2022 mints with the Scaled UI Amount extension, seeded with several dividend rounds so the charts have real on-chain history. The app's faucet sends test stock and devnet SOL.
+The demo stocks are Token-2022 mints with the Scaled UI Amount extension, seeded with several dividend rounds so the charts have real on-chain history. The app's faucet sends test stock, demo USDC and devnet SOL.
 
 ## Program
 
@@ -81,7 +81,7 @@ A Next.js 14 app (`app/`):
   - Your position.
   - Analytics rebuilt from on-chain events: supply, reinvested and cash dividends, and recent activity.
 - **Trade section:** on each market page, an order book for PT and YT with best prices, lifetime dividends per YT, one-transaction "list" (unlocking first if needed) and "buy & lock", and cancelling your own listings.
-- **Reference prices from Pyth:** each listing is shown as a percentage of the stock's live price, along with what PT and YT together cost against one share. Pyth's 24/7 equity feeds are used when US markets are closed. Set `PYTH_API_KEY` ([pythdata.app](https://pythdata.app)) to enable it; the key needs entitlement for US equity feeds, and without access the app hides these panels.
+- **Reference prices:** each listing is shown as a percentage of the stock's live price, along with what PT and YT together cost against one share. Prices come from Jupiter's public price API for the matching xStock (no key needed), or from Pyth's equity feeds when `PYTH_API_KEY` has entitlement for them.
 - **Transaction modal:** every action walks through each step and ends with an explorer link.
 - **Network switch:** toggles Devnet and Mainnet. A server-side RPC proxy is used because public mainnet RPC blocks browser requests.
 
@@ -141,7 +141,7 @@ Stripr's program and app are original work for this hackathon, built on these op
 - [Anchor](https://github.com/solana-foundation/anchor) and [Agave](https://github.com/anza-xyz/agave) for the on-chain program
 - [SPL Token and Token-2022](https://github.com/solana-program) with `@solana/spl-token` and `@solana/web3.js`
 - [Solana Wallet Adapter](https://github.com/anza-xyz/wallet-adapter)
-- [Pyth Network](https://pyth.network) equity price feeds for reference stock prices
+- [Jupiter](https://jup.ag) price API and [Pyth Network](https://pyth.network) equity feeds for reference stock prices
 - [Next.js](https://nextjs.org), [React](https://react.dev), [TanStack Query](https://tanstack.com/query), [Tailwind CSS](https://tailwindcss.com) and [Lucide](https://lucide.dev) icons
 - [Mocha](https://mochajs.org), [Chai](https://www.chaijs.com) and [tsx](https://tsx.is) for tests
 

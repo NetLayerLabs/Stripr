@@ -21,6 +21,8 @@ import { getProgram } from "@/lib/stripr";
 export const dynamic = "force-dynamic";
 
 const STOCK_PER_REQUEST = 100n;
+// Enough demo USDC to buy from the seeded YT listings and try the buy & lock flow.
+const USDC_PER_REQUEST = 1_000n;
 const SOL_TOP_UP = 0.05 * LAMPORTS_PER_SOL;
 const COOLDOWN_MS = 10 * 60 * 1000;
 
@@ -104,6 +106,28 @@ export async function POST(request: Request) {
         tokenProgram
       )
     );
+    // Demo USDC too, when the faucet key is its mint authority (it is for the seeded devnet USDC).
+    let usdc = 0n;
+    const dividendInfo = await connection.getAccountInfo(account.dividendMint);
+    if (dividendInfo) {
+      const dividendProgram = dividendInfo.owner;
+      const dividendMint = unpackMint(account.dividendMint, dividendInfo, dividendProgram);
+      if (dividendMint.mintAuthority?.equals(faucet.publicKey)) {
+        usdc = USDC_PER_REQUEST * 10n ** BigInt(dividendMint.decimals);
+        const dividendAccount = getAssociatedTokenAddressSync(dividendMint.address, wallet, true, dividendProgram);
+        transaction.add(
+          createAssociatedTokenAccountIdempotentInstruction(
+            faucet.publicKey,
+            dividendAccount,
+            wallet,
+            dividendMint.address,
+            dividendProgram
+          ),
+          createMintToInstruction(dividendMint.address, dividendAccount, faucet.publicKey, usdc, [], dividendProgram)
+        );
+      }
+    }
+
     const topUpSol = (await connection.getBalance(wallet)) < SOL_TOP_UP;
     if (topUpSol) {
       transaction.add(
@@ -114,7 +138,12 @@ export async function POST(request: Request) {
     const signature = await sendAndConfirmTransaction(connection, transaction, [faucet], {
       commitment: "confirmed",
     });
-    return NextResponse.json({ signature, amount: STOCK_PER_REQUEST.toString(), sol: topUpSol });
+    return NextResponse.json({
+      signature,
+      amount: STOCK_PER_REQUEST.toString(),
+      usdc: usdc > 0n ? USDC_PER_REQUEST.toString() : "0",
+      sol: topUpSol,
+    });
   } catch (error) {
     lastRequest.delete(key);
     lastRequestByIp.delete(ip);

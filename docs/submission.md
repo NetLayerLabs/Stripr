@@ -52,12 +52,12 @@ Tokenized stocks like xStocks already trade on Solana. But a share's two parts a
 - **Live on Devnet:**
   - Five demo markets (AAPL, MSFT, JNJ, KO, PG) with several dividend rounds of history.
   - Listings and sales in the offer book.
-  - A faucet for test stock.
+  - A faucet for test stock and demo USDC.
 - **Web app:**
   - Markets dashboard.
   - Market pages with strip, redeem, earn and trade.
   - On-chain analytics: supply, reinvested and cash dividends, and activity.
-  - Pyth equity price feeds, so every PT and YT listing is priced against the stock's live share price, using Pyth's 24/7 feeds when US markets are closed. Enabled by an API key with US equity entitlement; without one the app hides these panels.
+  - Live reference prices, so every PT and YT listing is shown as a share of the stock's price and PT + YT is compared against one share. Sourced from Jupiter's price API for the matching xStock, with Pyth equity feeds as the preferred source when a key with entitlement is configured.
   - A transaction modal with explorer links.
   - A Devnet/Mainnet switch.
   - A live mainnet AAPLx data panel on the landing page.
@@ -77,4 +77,4 @@ Tokenized stocks like xStocks already trade on Solana. But a share's two parts a
 
 ## Open-source components
 
-Original work built on Anchor, Agave, SPL Token and Token-2022 (`@solana/spl-token`, `@solana/web3.js`), Solana Wallet Adapter, Next.js, React, TanStack Query, Tailwind CSS, Lucide, Mocha, Chai and tsx.
+Original work built on Anchor, Agave, SPL Token and Token-2022 (`@solana/spl-token`, `@solana/web3.js`), Solana Wallet Adapter, Jupiter's price API, Next.js, React, TanStack Query, Tailwind CSS, Lucide, Mocha, Chai and tsx.

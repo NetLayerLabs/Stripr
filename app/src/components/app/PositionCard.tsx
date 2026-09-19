@@ -185,7 +185,7 @@ export function PositionCard({
           {faucetEnabled ? (
             <button type="button" className="btn-secondary h-10 w-full" onClick={() => void actions.requestFaucet()}>
               <Droplets className="h-4 w-4 text-sky-300" />
-              Get test {market.symbol}
+              Get test {market.symbol} + {market.dividendSymbol}
             </button>
           ) : null}
         </div>

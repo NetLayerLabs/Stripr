@@ -48,6 +48,7 @@ const tokenSymbol = (market: MarketView, asset: OfferAsset) => `${asset.toUpperC
 
 /** Where a Pyth reference price came from: live, last close, or the 24/7 feed. */
 function priceNote(stock: StockPrice) {
+  if (stock.source === "jupiter") return "xStock price via Jupiter";
   if (stock.roundTheClock) return "Pyth · 24/7 feed";
   if (stock.marketOpen === false) return "Pyth · at last close";
   return "Pyth · live";
