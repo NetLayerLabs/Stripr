@@ -28,7 +28,21 @@ const ALLOWED_METHODS = new Set([
   "simulateTransaction",
 ]);
 const MAX_BODY_BYTES = 256_000;
-const MAX_BATCH = 20;
+const MAX_BATCH = 5;
+
+/** Only this app's own pages may relay through here; other sites get 403. */
+function sameOrigin(request: Request) {
+  const site = request.headers.get("sec-fetch-site");
+  if (site && site !== "same-origin" && site !== "none") return false;
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("host");
+  if (!origin || !host) return true;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
 
 const reject = (message: string, status: number) =>
   NextResponse.json({ jsonrpc: "2.0", id: null, error: { code: -32600, message } }, { status });
@@ -36,6 +50,7 @@ const reject = (message: string, status: number) =>
 export async function POST(request: Request, { params }: { params: { cluster: string } }) {
   const cluster = parseCluster(params.cluster);
   if (!cluster) return reject("Unknown network.", 404);
+  if (!sameOrigin(request)) return reject("Forbidden.", 403);
 
   const body = await request.text();
   if (body.length > MAX_BODY_BYTES) return reject("Request too large.", 413);

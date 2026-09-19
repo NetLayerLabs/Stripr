@@ -16,7 +16,7 @@ import idl from "@/idl/stripr.json";
 import type { Stripr } from "@/idl/stripr";
 import type { Cluster } from "./config";
 import { pow10 } from "./format";
-import { tokenMeta } from "./tokens";
+import { isListedMarket, tokenMeta } from "./tokens";
 
 export type MarketAccount = IdlAccounts<Stripr>["market"];
 export type PositionAccount = IdlAccounts<Stripr>["yieldPosition"];
@@ -125,6 +125,7 @@ export async function fetchMarkets(connection: Connection, cluster: Cluster): Pr
 
   return markets
     .flatMap(({ publicKey, account }) => {
+      if (!isListedMarket(account.underlyingMint, account.dividendMint, cluster)) return [];
       const underlying = mints.get(account.underlyingMint.toBase58());
       const dividend = mints.get(account.dividendMint.toBase58());
       if (!underlying || !dividend) return [];
