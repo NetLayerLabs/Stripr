@@ -15,7 +15,7 @@ export function MarketHeader({
   market: MarketView;
   onSelect: (address: string) => void;
 }) {
-  const { addressUrl } = useNetwork();
+  const { addressUrl, cluster } = useNetwork();
   const address = market.address.toBase58();
 
   return (
@@ -28,6 +28,14 @@ export function MarketHeader({
             <span className="rounded-md border border-white/10 px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">
               PT · YT
             </span>
+            {cluster === "devnet" ? (
+              <span
+                title="A team-minted Token-2022 test token that behaves like an xStock. Not the real share."
+                className="rounded-md border border-amber-300/25 bg-amber-300/[0.06] px-1.5 py-0.5 text-[11px] font-medium text-amber-200"
+              >
+                Demo · test token
+              </span>
+            ) : null}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-zinc-500">
             <span>{market.name}</span>
@@ -67,6 +75,7 @@ export function MarketHeader({
 }
 
 export function MarketStats({ market }: { market: MarketView }) {
+  const { cluster } = useNetwork();
   const { decimals } = market.underlying;
   const dividendDecimals = market.dividend.decimals;
 
@@ -90,7 +99,11 @@ export function MarketStats({ market }: { market: MarketView }) {
       <StatTile
         label="Cash dividends"
         value={formatAmount(market.totalDividends, dividendDecimals, 2)}
-        sub={`${market.dividendSymbol} paid to locked YT`}
+        sub={
+          cluster === "devnet"
+            ? `Demo ${market.dividendSymbol} paid to locked YT · real xStocks only reinvest`
+            : `${market.dividendSymbol} paid to locked YT`
+        }
       />
     </div>
   );

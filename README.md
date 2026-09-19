@@ -57,7 +57,8 @@ A single Anchor program (`programs/stripr`) with twelve instructions:
 | `initialize_market` | Admin | Creates the stock vault, PT/YT mints and dividend vault for a stock |
 | `strip` | Anyone | Deposits stock, mints equal PT and YT in share units |
 | `redeem` | Anyone | Burns equal PT and YT, returns the stock |
-| `lock_yt` / `unlock_yt` | YT holder | Starts or stops earning, settling yield first |
+| `lock_yt` | YT holder | Locks YT so it earns, settling yield first |
+| `unlock_yt` | YT holder | Returns YT to the wallet; earned yield stays claimable |
 | `distribute_dividend` | Admin | Deposits a cash dividend for locked YT |
 | `claim_yield` | YT holder | Pays unclaimed cash dividends |
 | `sync_multiplier` | Anyone | Releases reinvested dividends after the stock's multiplier rises |

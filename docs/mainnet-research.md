@@ -1,5 +1,7 @@
 # Stripr mainnet launch research (Grok, 14 Sep 2026)
 
+> **Update (19 Sep 2026):** the multiplier-index design (design A in §3) is implemented — `Market::sync_multiplier` in `programs/stripr/src/state.rs` pays reinvested dividends to locked YT — and the hackathon deadline moved to 25 Sep 2026. Cross-check notes below that predate this are historical.
+
 Research produced by Grok from the Stripr project brief. It has not been independently verified; items marked **Unsure** need confirmation before relying on them. Cross-check notes from the Stripr build are at the end.
 
 Stocklana mainnet launch brief for Stripr — a Pendle-style yield-strip for xStocks on Solana, due Friday 18 Sep 2026, 4:00pm ET.
@@ -249,5 +251,5 @@ solana program show 9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF --url devnet
 - **Devnet deploy cost (§7):** measured, not estimated. The devnet program data account (385,192 bytes) holds 1.9577 SOL; the deploy took the deployer from 5.00 to 3.02 SOL including the IDL metadata account.
 - **Issuer risk (§4):** confirmed on-chain. AAPLx, SPYx, TSLAx, NVDAx and MSFTx all carry permanentDelegate, pausableConfig, scaledUiAmountConfig and an unset transferHook, with the same mint authority `7pt9tkctJPK7PPNQJ77GKg8ZffSF6QxoMiCFYHxrtaCj` and freeze authority `JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs`.
 - **Rehearsal (§3, §4):** Stripr's test suite already runs strip → lock → dividend → claim → redeem on an xStock-style Token-2022 mint and confirms strip is rejected while the mint is paused. It does not yet test multiplier growth, because the current YT model pays admin-deposited USDC.
-- **Current YT model:** YT earns USDC deposited by the market admin (design B in §3). The multiplier-index redesign (design A) is not implemented yet.
+- **Current YT model:** YT earns reinvested dividends from the stock's multiplier (design A in §3, implemented in `state.rs`) plus any cash dividend the market admin deposits (design B). Cash dividends exist for demos; real xStocks only reinvest.
 - **Browser RPC:** the public mainnet RPC returns 403 to any browser origin (HTTP and websocket), so the mainnet app needs either a server-side RPC proxy or a provider key such as Helius.
