@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ProtocolStats } from "./ProtocolStats";
 import { SplitDiagram } from "./SplitDiagram";
@@ -19,7 +18,6 @@ export function Hero() {
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/app" className="btn-primary h-12 px-6 text-[15px]">
             Launch app
-            <ArrowRight className="h-4 w-4" />
           </Link>
           <a href="#how" className="btn-secondary h-12 px-6 text-[15px]">
             See how it works

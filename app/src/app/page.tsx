@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -45,7 +44,6 @@ export default function Home() {
               <div className="relative mt-8 flex flex-wrap justify-center gap-3">
                 <Link href="/app" className="btn-primary h-12 px-6 text-[15px]">
                   Launch app
-                  <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a href="#faq" className="btn-secondary h-12 px-6 text-[15px]">
                   Read the FAQ
