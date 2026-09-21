@@ -9,6 +9,39 @@ Holders can keep, sell or hedge each part separately, and a PT + YT pair always 
 
 Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.com/hackathons/stocklana) (Credit & Yield track).
 
+## For judges
+
+**Try it in three minutes** (Solana Devnet, no setup):
+
+1. Open the app, pick the **PG** market — it pays both kinds of dividend.
+2. Connect any wallet on Devnet and press **Get test PG + USDC**. You receive 100 PG, 1,000 demo USDC, and a little SOL for fees.
+3. **Strip** 10 PG with "Lock YT to earn" on. One transaction mints 10 PT-PG and 10 YT-PG and locks the YT.
+4. In **Trade PT and YT**, press **Sell**, list 5 YT-PG at any price, and watch it appear in the book as a % of the live PG share price.
+5. Press **Buy** on someone else's listing with "Lock to start earning" on — one transaction buys and locks.
+6. **Recent activity** shows every step with explorer links, and the charts are rebuilt from those on-chain events.
+
+**Verify it on-chain**
+
+| What | Where |
+|---|---|
+| Program (Devnet) | [`9wpHm…nzZF`](https://explorer.solana.com/address/9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF?cluster=devnet) |
+| A reinvested dividend reaching locked YT | [`5noUGW…Touve`](https://explorer.solana.com/tx/5noUGWJLGg6vEw8ynKaGcF68cW8kx8AnNitAR3sXYLUqTWpmhx7rXXjcJFyvxbtgnmFNa91RxsCf1WzJHjTTouve?cluster=devnet) |
+| A YT sale filled from the order book | [`3E4yeZ…nYhiy`](https://explorer.solana.com/tx/3E4yeZqguWHTPgV8Ctq2bwtBozUcFcofRJetCrZZhzj6Dg7siQDTaSadvKumdcXJpTHyMJwnLysuB94psPXnYhiy?cluster=devnet) |
+| Live mainnet dividend ledger | The "What each xStock last paid" table on the landing page, read from each mint's Scaled UI Amount config |
+
+**What is real, and what is a demo**
+
+| | Real | Demo |
+|---|---|---|
+| Dividend mechanism | Read from the Token-2022 Scaled UI Amount multiplier, the way xStocks actually pay | — |
+| Mainnet data | Every xStock's multiplier, dividend and price shown live on the landing page | — |
+| Stocks in the markets | — | Team-minted Token-2022 tokens named after the companies, so anyone can strip without owning xStocks |
+| USDC | — | A demo mint, so the faucet can hand out spending money |
+| Cash dividends (KO, PG markets) | The program instruction is real | Real xStocks only reinvest; a cash payer must deposit the USDC |
+| Trades and positions | Every transaction is on-chain and verifiable | Seeded by our own demo wallets |
+
+**Tests:** `cargo test -p stripr` (8 accounting unit tests) and `npm run test:program` (19 end-to-end tests on a local validator, including a market on the real mainnet AAPLx mint).
+
 ## Who it's for
 
 Stocks are coming on-chain as SPL tokens (for example xStocks), but a share's income still can't be separated from its principal. Stripr gives dividends their own token, much as Pendle does for DeFi yield, and a place to trade it.

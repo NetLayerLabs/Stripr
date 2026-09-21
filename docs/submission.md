@@ -7,6 +7,8 @@
 - Live demo: _add the hosted app URL_
 - Video: _add the demo video URL_
 
+**For judges:** the README's [For judges](https://github.com/NetLayerLabs/Stripr#for-judges) section has a three-minute click path, explorer links to a real reinvested dividend and a real YT sale, and a table of what is real versus demo.
+
 ## One-liner
 
 Stripr is an on-chain primitive that turns the way xStocks actually pay dividends — a rising Token-2022 Scaled UI Amount multiplier — into a separately owned, tradeable yield token. Strip a stock into PT (the share) and YT (its dividends); locked YT captures every multiplier increase automatically, and an on-chain offer book prices YT in USDC.
