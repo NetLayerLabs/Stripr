@@ -4,7 +4,7 @@ import { SplitDiagram } from "./SplitDiagram";
 
 export function Hero() {
   return (
-    <section className="mx-auto grid max-w-page items-center gap-14 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24 lg:pt-24">
+    <section className="relative isolate overflow-x-clip mx-auto grid max-w-page items-center gap-14 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24 lg:pt-24">
       <div>
         <p className="eyebrow animate-rise">Yield stripping for tokenized stocks</p>
         <h1 className="animate-rise mt-5 text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.5rem] lg:leading-[1.05]">
