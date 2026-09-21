@@ -1,3 +1,5 @@
+import { Reveal } from "./Reveal";
+
 const ITEMS = [
   {
     label: "Problem",
@@ -27,11 +29,11 @@ export function AtAGlance() {
           </h2>
         </div>
         <dl className="grid gap-px bg-white/[0.07] md:grid-cols-2 lg:grid-cols-4">
-          {ITEMS.map((item) => (
-            <div key={item.label} className="bg-ink-900 p-6">
+          {ITEMS.map((item, index) => (
+            <Reveal key={item.label} delay={index * 0.07} className="bg-ink-900 p-6">
               <dt className="label text-emerald-300/90">{item.label}</dt>
               <dd className="mt-3 text-sm leading-relaxed text-zinc-300">{item.body}</dd>
-            </div>
+            </Reveal>
           ))}
         </dl>
       </div>

@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react";
+import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
 const QUESTIONS = [
@@ -50,14 +51,21 @@ export function Faq() {
       tinted
     >
       <div className="mx-auto grid max-w-4xl gap-3">
-        {QUESTIONS.map(({ q, a }) => (
-          <details key={q} className="card group p-0 [&_summary::-webkit-details-marker]:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left font-medium text-white">
-              {q}
-              <Plus className="h-4 w-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-45" />
-            </summary>
-            <p className="px-6 pb-6 text-sm leading-relaxed text-zinc-400">{a}</p>
-          </details>
+        {QUESTIONS.map(({ q, a }, index) => (
+          <Reveal key={q} delay={index * 0.04}>
+            <details className="card group p-0 transition-colors hover:border-white/[0.14] [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left font-medium text-white">
+                {q}
+                <Plus className="h-4 w-4 shrink-0 text-zinc-500 transition-transform duration-300 group-open:rotate-45 group-open:text-emerald-300" />
+              </summary>
+              {/* A grid row animating 0fr -> 1fr expands the answer smoothly. */}
+              <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-open:grid-rows-[1fr]">
+                <p className="overflow-hidden px-6 text-sm leading-relaxed text-zinc-400">
+                  <span className="block pb-6">{a}</span>
+                </p>
+              </div>
+            </details>
+          </Reveal>
         ))}
       </div>
     </Section>

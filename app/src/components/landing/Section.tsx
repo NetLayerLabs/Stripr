@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { Reveal } from "./Reveal";
 
 export function SectionHeading({
   eyebrow,
@@ -14,10 +15,16 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn("max-w-2xl", align === "center" && "mx-auto text-center")}>
-      <p className="eyebrow animate-rise">{eyebrow}</p>
-      <h2 className="animate-rise mt-4 text-balance text-[2rem] leading-[1.1] text-white sm:text-[2.6rem]">{title}</h2>
+      <Reveal as="p" className="eyebrow">
+        {eyebrow}
+      </Reveal>
+      <Reveal as="h2" delay={0.06} className="mt-4 text-balance text-[2rem] leading-[1.1] text-white sm:text-[2.6rem]">
+        {title}
+      </Reveal>
       {description ? (
-        <p className="animate-rise mt-5 text-pretty text-lg leading-relaxed text-zinc-400">{description}</p>
+        <Reveal as="p" delay={0.12} className="mt-5 text-pretty text-lg leading-relaxed text-zinc-400">
+          {description}
+        </Reveal>
       ) : null}
     </div>
   );

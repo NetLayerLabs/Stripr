@@ -1,5 +1,6 @@
 import { CircleCheck, CircleDashed, CircleDot } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
 type Status = "done" | "active" | "planned";
@@ -54,7 +55,12 @@ export function Roadmap() {
     >
       <ol className="grid gap-4 lg:grid-cols-3">
         {PHASES.map((phase, index) => (
-          <li key={phase.phase} className={cn("card p-6", index === 0 && "border-emerald-400/20")}>
+          <Reveal
+            as="li"
+            key={phase.phase}
+            delay={index * 0.1}
+            className={cn("card card-interactive p-6", index === 0 && "border-emerald-400/20")}
+          >
             <div className="flex items-center justify-between">
               <span
                 className={cn(
@@ -62,11 +68,14 @@ export function Roadmap() {
                   index === 0 ? "bg-emerald-400/15 text-emerald-300" : "bg-white/[0.06] text-zinc-400"
                 )}
               >
+                {index === 0 ? (
+                  <span aria-hidden className="mr-1.5 inline-block h-1.5 w-1.5 animate-pulse-dot rounded-full bg-emerald-400 align-middle" />
+                ) : null}
                 {phase.phase}
               </span>
               <span className="font-mono text-xs text-zinc-600">0{index + 1}</span>
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-white">{phase.title}</h3>
+            <h3 className="mt-4 font-display text-lg text-white">{phase.title}</h3>
             <ul className="mt-4 space-y-3">
               {phase.items.map((item) => {
                 const { icon: Icon, className, label } = STATUS_ICON[item.status];
@@ -78,7 +87,7 @@ export function Roadmap() {
                 );
               })}
             </ul>
-          </li>
+          </Reveal>
         ))}
       </ol>
     </Section>

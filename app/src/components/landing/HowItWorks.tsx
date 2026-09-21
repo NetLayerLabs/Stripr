@@ -1,6 +1,7 @@
 import { ArrowDownToLine, Coins, HandCoins, Store } from "lucide-react";
 import { DividendCalculator } from "./DividendCalculator";
 import { Section } from "./Section";
+import { Reveal } from "./Reveal";
 
 const STEPS = [
   {
@@ -40,7 +41,7 @@ export function HowItWorks() {
     >
       <ol className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {STEPS.map(({ icon: Icon, instruction, title, body }, index) => (
-          <li key={title} className="card card-interactive animate-rise flex flex-col p-6" style={{ animationDelay: `${index * 0.06}s` }}>
+          <Reveal as="li" key={title} delay={index * 0.08} className="card card-interactive flex flex-col p-6">
             <div className="flex items-baseline justify-between gap-3">
               <span aria-hidden className="font-display text-3xl leading-none text-emerald-300/80">
                 0{index + 1}
@@ -52,7 +53,7 @@ export function HowItWorks() {
             <code className="mt-5 self-start rounded-md border border-white/[0.07] bg-ink-950/70 px-2 py-1 font-mono text-[11px] text-zinc-400">
               {instruction}
             </code>
-          </li>
+          </Reveal>
         ))}
       </ol>
       <DividendCalculator />

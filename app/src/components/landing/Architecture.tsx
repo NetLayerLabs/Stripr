@@ -1,5 +1,6 @@
 import { Gauge, Layers, Scale, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
 const INSTRUCTIONS = [
@@ -86,7 +87,7 @@ export function Architecture() {
       description="Every account is a PDA, every vault is program-owned, and every payout costs the same no matter how many people hold YT."
     >
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card p-6 sm:p-8">
+        <Reveal className="card p-6 sm:p-8">
           <p className="label">Accounts</p>
           <div className="mt-4">
             <AccountBox
@@ -120,9 +121,9 @@ export function Architecture() {
               />
             </div>
           </div>
-        </div>
+        </Reveal>
 
-        <div className="card p-6 sm:p-8">
+        <Reveal delay={0.1} className="card p-6 sm:p-8">
           <p className="label">Instructions</p>
           <ul className="mt-4 divide-y divide-white/[0.05]">
             {INSTRUCTIONS.map((instruction) => (
@@ -144,11 +145,11 @@ export function Architecture() {
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="card flex flex-col overflow-hidden">
+        <Reveal className="card flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-3">
             <span className="text-sm font-medium text-white">Dividend accounting</span>
             <span className="font-mono text-[11px] text-zinc-500">state.rs</span>
@@ -169,17 +170,17 @@ export function Architecture() {
             Simplified from <code className="font-mono">programs/stripr/src/state.rs</code>, which uses checked u128
             math.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          {GUARANTEES.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="card flex gap-4 p-5">
+          {GUARANTEES.map(({ icon: Icon, title, body }, index) => (
+            <Reveal key={title} delay={index * 0.07} className="card card-interactive flex gap-4 p-5">
               <Icon className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
               <div>
                 <h3 className="text-sm font-semibold text-white">{title}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-zinc-400">{body}</p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Blocks, Landmark, Wallet } from "lucide-react";
 import { Section } from "./Section";
+import { Reveal } from "./Reveal";
 
 const PERSONAS = [
   {
@@ -35,16 +36,16 @@ export function UseCases() {
       tinted
     >
       <div className="grid gap-4 md:grid-cols-3">
-        {PERSONAS.map(({ icon: Icon, who, need, strategy, tone }) => (
-          <div key={who} className="card flex flex-col p-6">
+        {PERSONAS.map(({ icon: Icon, who, need, strategy, tone }, index) => (
+          <Reveal key={who} delay={index * 0.08} className="card card-interactive flex flex-col p-6">
             <Icon className={`h-6 w-6 ${tone}`} />
-            <h3 className="mt-5 text-lg font-semibold text-white">{who}</h3>
+            <h3 className="mt-5 font-display text-lg text-white">{who}</h3>
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">{need}</p>
             <div className="mt-5 border-t border-white/[0.06] pt-4">
               <p className="label">With Stripr</p>
               <p className="mt-2 text-sm leading-relaxed text-zinc-200">{strategy}</p>
             </div>
-          </div>
+          </Reveal>
         ))}
       </div>
     </Section>

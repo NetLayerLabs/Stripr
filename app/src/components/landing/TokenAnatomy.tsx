@@ -1,6 +1,7 @@
 import { TokenIcon, type TokenKind } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { Section } from "./Section";
+import { Reveal } from "./Reveal";
 
 const ROWS: Array<{ label: string; pt: string; yt: string }> = [
   { label: "Represents", pt: "The claim on the underlying share", yt: "The right to the share’s dividends" },
@@ -55,16 +56,20 @@ export function TokenAnatomy() {
       title="Two tokens, one share, zero ambiguity."
       description="Stripping never creates value out of thin air. It separates what a share is worth from what a share pays."
     >
-      <div className="card flex flex-wrap items-center justify-center gap-3 px-6 py-8 sm:gap-5">
+      <Reveal className="card flex flex-wrap items-center justify-center gap-3 px-6 py-8 sm:gap-5">
         <Chip kind="stock" symbol="AAPL" />
         <span className="text-2xl font-light text-zinc-500">=</span>
         <Chip kind="pt" symbol="PT-AAPL" />
         <span className="text-2xl font-light text-zinc-500">+</span>
         <Chip kind="yt" symbol="YT-AAPL" />
-      </div>
+      </Reveal>
       <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <TokenCard kind="pt" />
-        <TokenCard kind="yt" />
+        <Reveal delay={0.08}>
+          <TokenCard kind="pt" />
+        </Reveal>
+        <Reveal delay={0.16}>
+          <TokenCard kind="yt" />
+        </Reveal>
       </div>
     </Section>
   );

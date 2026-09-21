@@ -2,6 +2,7 @@ import { Blocks, Building2, Zap } from "lucide-react";
 import { DividendLedger } from "./DividendLedger";
 import { LiveXStock } from "./LiveXStock";
 import { Section } from "./Section";
+import { Reveal } from "./Reveal";
 
 const REASONS = [
   {
@@ -30,24 +31,26 @@ export function WhySolana() {
       description="Dividends touch every holder of a stock. Solana makes that practical on-chain, and the tokenized stocks are already here."
       tinted
     >
-      <div className="mb-6">
+      <Reveal className="mb-6">
         <DividendLedger />
-      </div>
+      </Reveal>
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="grid gap-4">
-          {REASONS.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="card flex gap-5 p-6">
+          {REASONS.map(({ icon: Icon, title, body }, index) => (
+            <Reveal key={title} delay={index * 0.07} className="card card-interactive flex gap-5 p-6">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04]">
                 <Icon className="h-5 w-5 text-emerald-300" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">{title}</h3>
+                <h3 className="font-display text-lg leading-snug text-white">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">{body}</p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
-        <LiveXStock />
+        <Reveal delay={0.12}>
+          <LiveXStock />
+        </Reveal>
       </div>
     </Section>
   );
