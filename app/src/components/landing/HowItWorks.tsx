@@ -40,14 +40,14 @@ export function HowItWorks() {
     >
       <ol className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {STEPS.map(({ icon: Icon, instruction, title, body }, index) => (
-          <li key={title} className="card flex flex-col p-6">
-            <div className="flex items-center justify-between">
-              <div className="grid h-10 w-10 place-items-center rounded-xl border border-emerald-300/15 bg-emerald-400/[0.06]">
-                <Icon className="h-5 w-5 text-emerald-300" />
-              </div>
-              <span className="font-mono text-xs text-zinc-600">0{index + 1}</span>
+          <li key={title} className="card card-interactive animate-rise flex flex-col p-6" style={{ animationDelay: `${index * 0.06}s` }}>
+            <div className="flex items-baseline justify-between gap-3">
+              <span aria-hidden className="font-display text-3xl leading-none text-emerald-300/80">
+                0{index + 1}
+              </span>
+              <Icon className="h-5 w-5 shrink-0 text-zinc-500" />
             </div>
-            <h3 className="mt-5 font-semibold text-white">{title}</h3>
+            <h3 className="mt-5 font-display text-lg leading-snug text-white">{title}</h3>
             <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-400">{body}</p>
             <code className="mt-5 self-start rounded-md border border-white/[0.07] bg-ink-950/70 px-2 py-1 font-mono text-[11px] text-zinc-400">
               {instruction}

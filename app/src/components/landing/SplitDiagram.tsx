@@ -39,7 +39,7 @@ function TokenCard({
 
 export function SplitDiagram() {
   return (
-    <figure className="relative mx-auto w-full max-w-md lg:ml-auto">
+    <figure className="animate-rise relative mx-auto w-full max-w-md lg:ml-auto">
       <div aria-hidden className="absolute -inset-8 -z-10 rounded-[40px] bg-emerald-500/[0.07] blur-3xl" />
 
       <div className="card flex items-center gap-3 p-5">
@@ -90,8 +90,9 @@ export function SplitDiagram() {
         <span className="ml-auto text-sm font-medium text-emerald-300">Paid to locked YT</span>
       </div>
 
-      <figcaption className="sr-only">
-        Depositing AAPL mints PT-AAPL and YT-AAPL. Dividends are paid to locked YT.
+      <figcaption className="mt-4 text-xs leading-relaxed text-zinc-500">
+        <span className="font-display italic text-zinc-400">Fig. 1</span> Depositing AAPL mints PT-AAPL and
+        YT-AAPL; every dividend the issuer pays goes to whoever holds the locked YT.
       </figcaption>
     </figure>
   );

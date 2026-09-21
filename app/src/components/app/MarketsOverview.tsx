@@ -97,7 +97,8 @@ export function MarketsOverview() {
     <div className="space-y-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Markets</h1>
+          <p className="eyebrow">Stripr markets</p>
+          <h1 className="mt-2 text-[1.75rem] leading-tight text-white sm:text-[2rem]">Markets</h1>
           <p className="mt-1 text-sm text-zinc-500">
             Every stock you can strip on Stripr, with stats read live from the chain.
           </p>

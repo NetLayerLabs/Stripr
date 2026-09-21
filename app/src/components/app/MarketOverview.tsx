@@ -24,7 +24,7 @@ export function MarketHeader({
         <TokenIcon kind="stock" symbol={market.symbol} size="lg" />
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-white">{market.symbol}</h1>
+            <h1 className="text-[1.75rem] leading-none text-white">{market.symbol}</h1>
             <span className="rounded-md border border-white/10 px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">
               PT · YT
             </span>

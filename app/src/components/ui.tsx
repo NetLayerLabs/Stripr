@@ -61,9 +61,7 @@ export function StatTile({ label, value, sub }: { label: string; value: ReactNod
   return (
     <div className="card min-w-0 p-4 sm:p-5">
       <div className="label">{label}</div>
-      <div className="mt-2 truncate text-xl font-semibold tracking-tight text-white sm:text-2xl">
-        {value}
-      </div>
+      <div className="num mt-2 truncate font-display text-xl leading-tight text-white sm:text-2xl">{value}</div>
       {sub ? <div className="mt-1 truncate text-xs text-zinc-500">{sub}</div> : null}
     </div>
   );
