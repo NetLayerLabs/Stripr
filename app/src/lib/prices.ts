@@ -42,6 +42,18 @@ export function paybackPercent(market: MarketView, price: bigint, paidUsd: numbe
   return (paidUsd / offerPriceUsd(market, price)) * 100;
 }
 
+/**
+ * What a YT listing yields, using the dividend rate the stock's multiplier has
+ * actually delivered since launch. Null when either number is missing.
+ */
+export function ytYield(market: MarketView, price: bigint, stock: StockPrice | undefined) {
+  if (!stock || stock.price <= 0 || !stock.annualizedRate || stock.annualizedRate <= 0 || price <= 0n) return null;
+  const perSharePerYear = stock.price * stock.annualizedRate;
+  const cost = offerPriceUsd(market, price);
+  if (cost <= 0) return null;
+  return { annualPercent: (perSharePerYear / cost) * 100, paybackYears: cost / perSharePerYear, perSharePerYear };
+}
+
 /** The cheapest listing of an asset, if any. */
 export const bestOffer = (offers: OfferView[], asset: "pt" | "yt") =>
   offers.find((offer) => offer.asset === asset);

@@ -34,6 +34,11 @@ export type StockPrice = {
   source: PriceSource;
   /** True when this came from Pyth's 24/7 index feed rather than its US market feed. */
   roundTheClock: boolean;
+  /**
+   * The dividend rate this stock's Scaled UI Amount multiplier has actually delivered
+   * since its token launched, annualized. Null when it can't be measured.
+   */
+  annualizedRate: number | null;
   /** US market hours for the stock, from Pyth feed metadata; null when unknown. */
   marketOpen: boolean | null;
   nextOpen: number | null;
@@ -126,6 +131,8 @@ async function fromPyth(key: string): Promise<PythOutcome> {
       confidence: Number(entry.price.conf) * scale,
       publishTime: entry.price.publish_time,
       source: "pyth",
+      // Pyth carries no multiplier; the dividend rate comes from the token itself.
+      annualizedRate: null,
       roundTheClock: feed.roundTheClock,
       marketOpen: marketHour ? marketHour.open : null,
       nextOpen: marketHour?.nextOpen ?? null,
@@ -137,7 +144,17 @@ async function fromPyth(key: string): Promise<PythOutcome> {
 type JupiterEntry = {
   usdPrice?: number;
   stockData?: { price?: number; updatedAt?: string };
+  createdAt?: string;
+  scaledUiConfig?: { multiplier?: number; newMultiplier?: number };
 };
+
+/** Total multiplier growth since launch, annualized. */
+function annualize(multiplier: number | undefined, createdAt: string | undefined): number | null {
+  if (!multiplier || multiplier <= 1 || !createdAt) return null;
+  const days = (Date.now() - Date.parse(createdAt)) / 86_400_000;
+  if (!Number.isFinite(days) || days < 30) return null;
+  return multiplier ** (365 / days) - 1;
+}
 
 async function fromJupiter(): Promise<Record<string, StockPrice>> {
   const mints = symbolsToXstockMints();
@@ -159,6 +176,7 @@ async function fromJupiter(): Promise<Record<string, StockPrice>> {
       confidence: 0,
       publishTime: Number.isFinite(updated) ? Math.floor(updated / 1000) : Math.floor(Date.now() / 1000),
       source: "jupiter",
+      annualizedRate: annualize(entry.scaledUiConfig?.newMultiplier, entry.createdAt),
       roundTheClock: false,
       marketOpen: null,
       nextOpen: null,

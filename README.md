@@ -115,6 +115,7 @@ A Next.js 14 app (`app/`):
   - Your position.
   - Analytics rebuilt from on-chain events: supply, reinvested and cash dividends, and recent activity.
 - **Trade section:** on each market page, an order book for PT and YT with best prices, lifetime dividends per YT, one-transaction "list" (unlocking first if needed) and "buy & lock", and cancelling your own listings.
+- **Yield on every YT listing:** each stock's Scaled UI Amount multiplier is read on mainnet and annualized since the token launched — PGx has delivered 1.68%/yr, KOx 1.76%, AAPLx 0.26% — so a YT price becomes a yield and a payback period ("8.78 USDC ≈ 28% a year, pays for itself in 3.6 years"). The markets table ranks by it.
 - **Reference prices:** each listing is shown as a percentage of the stock's live price, along with what PT and YT together cost against one share. Prices come from Jupiter's public price API for the matching xStock (no key needed), or from Pyth's equity feeds when `PYTH_API_KEY` has entitlement for them.
 - **Transaction modal:** every action walks through each step and ends with an explorer link.
 - **Network switch:** toggles Devnet and Mainnet. A server-side RPC proxy is used because public mainnet RPC blocks browser requests.

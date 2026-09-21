@@ -60,6 +60,7 @@ We say this plainly: with no maturity date and a fixed-price book, PT and YT don
   - Markets dashboard.
   - Market pages with strip, redeem, earn and trade.
   - On-chain analytics: supply, reinvested and cash dividends, and activity.
+  - A yield on every YT listing, from the dividend rate each stock's multiplier has actually delivered since launch (measured on mainnet, not assumed), plus the payback period and a ranked markets table.
   - Live reference prices, so every PT and YT listing is shown as a share of the stock's price and PT + YT is compared against one share. Sourced from Jupiter's price API for the matching xStock, with Pyth equity feeds as the preferred source when a key with entitlement is configured.
   - A transaction modal with explorer links.
   - A Devnet/Mainnet switch.
@@ -74,6 +75,7 @@ We say this plainly: with no maturity date and a fixed-price book, PT and YT don
 ## Honest limitations
 
 - Unaudited hackathon build.
+- Yields are computed from realized multiplier growth since each token launched; a stock can cut its dividend, and PT/YT have no maturity date yet, so neither has a term-structure price.
 - xStocks issuers can pause or move tokens, including Stripr's vaults.
 - Dividend capture: someone can lock YT just before a known multiplier update.
 - Prices come from fixed listings rather than an AMM.

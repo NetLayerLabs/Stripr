@@ -15,6 +15,7 @@ import {
   paybackPercent,
   shareOfStockPrice,
   splitVsStock,
+  ytYield,
   type StockPrice,
 } from "@/lib/prices";
 import {
@@ -81,6 +82,7 @@ export function TradePanel({ market, position, actions }: Props) {
     return percent === null ? fallback : `${formatPercent(percent)} of the share price`;
   };
   const split = splitVsStock(market, all, stock);
+  const bestYtYield = bestYt ? ytYield(market, bestYt.price, stock) : null;
 
   // What one whole YT has earned over the market's life, as context for its price.
   const cashPerYt = dividendPerYt(market);
@@ -135,7 +137,15 @@ export function TradePanel({ market, position, actions }: Props) {
             sub={`${all.filter((offer) => offer.asset === "yt").length} YT · ${all.filter((offer) => offer.asset === "pt").length} PT`}
           />
         )}
-        <StatTile label="Best YT price" value={price(bestYt)} sub={shareSub(bestYt, "Future dividends, per share")} />
+        <StatTile
+          label="Best YT price"
+          value={price(bestYt)}
+          sub={
+            bestYtYield
+              ? `≈ ${formatPercent(bestYtYield.annualPercent)} a year at ${market.symbol}'s realized dividend rate`
+              : shareSub(bestYt, "Future dividends, per share")
+          }
+        />
         <StatTile label="Best PT price" value={price(bestPt)} sub={shareSub(bestPt, "The share without dividends")} />
         <StatTile
           label="Paid per YT so far"
@@ -243,6 +253,9 @@ function OrderBook({
               <tr className="text-left">
                 <th className="label px-5 py-3 font-medium sm:px-6">Price</th>
                 {stock ? <th className="label px-5 py-3 text-right font-medium">% of share</th> : null}
+                {stock && asset === "yt" ? (
+                  <th className="label px-5 py-3 text-right font-medium">Yield / yr</th>
+                ) : null}
                 <th className="label px-5 py-3 text-right font-medium">Available</th>
                 <th className="label px-5 py-3 text-right font-medium">Total</th>
                 <th className="label px-5 py-3 font-medium">Seller</th>
@@ -263,6 +276,14 @@ function OrderBook({
                         {(() => {
                           const percent = shareOfStockPrice(market, offer.price, stock);
                           return percent === null ? "—" : formatPercent(percent);
+                        })()}
+                      </td>
+                    ) : null}
+                    {stock && asset === "yt" ? (
+                      <td className="num px-5 py-3 text-right text-emerald-300/90">
+                        {(() => {
+                          const y = ytYield(market, offer.price, stock);
+                          return y === null ? "—" : formatPercent(y.annualPercent);
                         })()}
                       </td>
                     ) : null}
@@ -341,6 +362,7 @@ function BuyForm({
 
   const amount = parseAmount(value, decimals);
   const cost = offerCost(offer.price, amount ?? 0n, decimals);
+  const buyYield = asset === "yt" ? ytYield(market, offer.price, stock) : null;
   const blockedLabel = own
     ? "This is your listing"
     : position && cost > position.dividend
@@ -366,6 +388,12 @@ function BuyForm({
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <Row label="Price" value={`${formatAmount(offer.price, market.dividend.decimals, 2)} ${market.dividendSymbol}`} />
         <Row label="You pay" value={`${formatAmount(cost, market.dividend.decimals, 2)} ${market.dividendSymbol}`} />
+        {asset === "yt" && buyYield ? (
+          <Row
+            label="Yield at this price"
+            value={`${formatPercent(buyYield.annualPercent)} a year · pays for itself in ${buyYield.paybackYears.toFixed(1)} yrs`}
+          />
+        ) : null}
         {asset === "yt" && paidUsd !== null && paidUsd > 0 ? (
           <Row
             label="Paid so far per YT"
@@ -430,6 +458,7 @@ function SellForm({
   const sellable = position ? (asset === "yt" ? position.yt + position.ytLocked : position.pt) : undefined;
   const unlockFirst = asset === "yt" && position && amount && amount > position.yt ? amount - position.yt : 0n;
   const proceeds = offerCost(price ?? 0n, amount ?? 0n, decimals);
+  const sellYield = asset === "yt" && price ? ytYield(market, price, stock) : null;
 
   async function submit() {
     if (amount && price && (await actions.listOffer(asset, amount, price, unlockFirst))) {
@@ -460,6 +489,9 @@ function SellForm({
       />
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <Row label="You receive when it sells" value={`${formatAmount(proceeds, quoteDecimals, 2)} ${market.dividendSymbol}`} />
+        {asset === "yt" && sellYield ? (
+          <Row label="Yield you're offering" value={`${formatPercent(sellYield.annualPercent)} a year to the buyer`} />
+        ) : null}
         {asset === "yt" && price && paidUsd !== null && paidUsd > 0 ? (
           <Row
             label="Paid so far per YT"

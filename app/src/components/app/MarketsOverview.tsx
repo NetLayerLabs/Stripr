@@ -6,14 +6,17 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { StatTile, TokenIcon } from "@/components/ui";
 import { useMarkets } from "@/hooks/useMarkets";
+import { useOffersByMarket } from "@/hooks/useOffers";
+import { usePrices } from "@/hooks/usePrices";
 import { usePositionCounts } from "@/hooks/usePositionCounts";
 import { cn } from "@/lib/cn";
 import { useNetwork } from "@/components/NetworkProvider";
 import { formatAmount, formatShare } from "@/lib/format";
+import { formatPercent, ytYield } from "@/lib/prices";
 import { sharesForRaw, type MarketView } from "@/lib/stripr";
 import { DashboardSkeleton, ErrorState, NoMarkets } from "./States";
 
-type SortKey = "market" | "stripped" | "locked" | "reinvested" | "dividends" | "positions";
+type SortKey = "market" | "stripped" | "locked" | "ytYield" | "reinvested" | "dividends" | "positions";
 type Direction = "asc" | "desc";
 
 type Row = {
@@ -24,12 +27,15 @@ type Row = {
   reinvested: number;
   dividends: number;
   positions: number;
+  /** Yield on the cheapest YT listing, at the stock's realized dividend rate. */
+  ytYieldPercent: number | null;
 };
 
 const COLUMNS: Array<{ key: SortKey; label: string }> = [
   { key: "market", label: "Market" },
   { key: "stripped", label: "Stock stripped" },
   { key: "locked", label: "YT earning" },
+  { key: "ytYield", label: "YT yield" },
   { key: "reinvested", label: "Reinvested dividends" },
   { key: "dividends", label: "Cash dividends" },
   { key: "positions", label: "Earning positions" },
@@ -39,6 +45,7 @@ const SORT_VALUE: Record<SortKey, (row: Row) => number | string> = {
   market: (row) => row.market.symbol,
   stripped: (row) => row.stripped,
   locked: (row) => row.lockedRatio,
+  ytYield: (row) => row.ytYieldPercent ?? -1,
   reinvested: (row) => row.reinvested,
   dividends: (row) => row.dividends,
   positions: (row) => row.positions,
@@ -49,6 +56,8 @@ export function MarketsOverview() {
   const { cluster, label } = useNetwork();
   const markets = useMarkets();
   const positions = usePositionCounts();
+  const prices = usePrices();
+  const offersByMarket = useOffersByMarket();
   const [sort, setSort] = useState<{ key: SortKey; direction: Direction }>({ key: "stripped", direction: "desc" });
 
   const rows = useMemo<Row[]>(
@@ -61,8 +70,13 @@ export function MarketsOverview() {
         reinvested: Number(sharesForRaw(market, market.totalStockYield)) / 10 ** market.underlying.decimals,
         dividends: Number(market.totalDividends) / 10 ** market.dividend.decimals,
         positions: positions.data?.counts.get(market.address.toBase58()) ?? 0,
+        ytYieldPercent: (() => {
+          const stock = prices.data?.enabled ? prices.data.prices[market.symbol] : undefined;
+          const best = offersByMarket.data?.get(market.address.toBase58())?.find((offer) => offer.asset === "yt");
+          return best ? (ytYield(market, best.price, stock)?.annualPercent ?? null) : null;
+        })(),
       })),
-    [markets.data, positions.data]
+    [markets.data, positions.data, prices.data, offersByMarket.data]
   );
 
   const sorted = useMemo(() => {
@@ -197,6 +211,13 @@ export function MarketsOverview() {
                           />
                         </span>
                       </div>
+                    </td>
+                    <td className="num px-5 py-4 text-right">
+                      {row.ytYieldPercent === null ? (
+                        <span className="text-zinc-600">—</span>
+                      ) : (
+                        <span className="text-emerald-300/90">{formatPercent(row.ytYieldPercent)}</span>
+                      )}
                     </td>
                     <td className="num px-5 py-4 text-right text-zinc-200">
                       {formatAmount(sharesForRaw(market, market.totalStockYield), market.underlying.decimals, 4)}{" "}

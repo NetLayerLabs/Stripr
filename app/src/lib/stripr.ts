@@ -314,3 +314,35 @@ export async function fetchOffers(connection: Connection, market: MarketView): P
     .filter((offer) => offer.amount > 0n)
     .sort((a, b) => (a.price === b.price ? a.createdAt - b.createdAt : a.price < b.price ? -1 : 1));
 }
+
+/** Every open offer across all markets, cheapest first, grouped by market address. */
+export async function fetchAllOffers(connection: Connection, cluster: Cluster): Promise<Map<string, OfferView[]>> {
+  const markets = await fetchMarkets(connection, cluster);
+  const byPtMint = new Map(markets.map((market) => [market.account.ptMint.toBase58(), market.address.toBase58()]));
+  const byYtMint = new Map(markets.map((market) => [market.account.ytMint.toBase58(), market.address.toBase58()]));
+  const program = getProgram(connection);
+  const offers = await program.account.offer.all([{ dataSize: program.account.offer.size }]);
+
+  const grouped = new Map<string, OfferView[]>();
+  for (const { publicKey, account } of offers) {
+    const amount = toBigInt(account.amount);
+    if (amount === 0n) continue;
+    const mint = account.tokenMint.toBase58();
+    const market = byPtMint.get(mint) ?? byYtMint.get(mint);
+    if (!market) continue;
+    const view: OfferView = {
+      address: publicKey,
+      maker: account.maker,
+      asset: byPtMint.has(mint) ? "pt" : "yt",
+      tokenMint: account.tokenMint,
+      id: toBigInt(account.id),
+      price: toBigInt(account.price),
+      amount,
+      initialAmount: toBigInt(account.initialAmount),
+      createdAt: account.createdAt.toNumber() * 1000,
+    };
+    grouped.set(market, [...(grouped.get(market) ?? []), view]);
+  }
+  for (const list of grouped.values()) list.sort((a, b) => (a.price === b.price ? a.createdAt - b.createdAt : a.price < b.price ? -1 : 1));
+  return grouped;
+}

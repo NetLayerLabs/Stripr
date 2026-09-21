@@ -35,6 +35,9 @@ export type DividendRow = {
   /** Stock price in USD (Jupiter), and the dividend in USD per share. */
   price: number | null;
   lastDividendUsdPerShare: number | null;
+  /** When the token launched, and the dividend rate its multiplier has actually delivered since. */
+  createdAt: number | null;
+  annualizedRate: number | null;
   /** What 100 locked YT would have received from that dividend, in stock and USD. */
   ytPer100Shares: number;
   ytPer100Usd: number | null;
@@ -44,6 +47,19 @@ export type DividendRow = {
 export type DividendLedger = { rows: DividendRow[]; readAt: number };
 
 let cache: { at: number; body: DividendLedger } | null = null;
+
+type JupiterEntry = { usdPrice?: number; stockData?: { price?: number }; createdAt?: string };
+
+/**
+ * The dividend rate a stock's multiplier has actually delivered: total growth since
+ * the token launched, annualized. Honest in a way "last dividend x 4" is not.
+ */
+function annualize(multiplier: number, createdAt: number | null): number | null {
+  if (!createdAt || multiplier <= 1) return null;
+  const days = (Date.now() / 1000 - createdAt) / 86_400;
+  if (days < 30) return null;
+  return multiplier ** (365 / days) - 1;
+}
 
 type ParsedMint = {
   owner: string;
@@ -72,8 +88,10 @@ export async function GET() {
         return ((await r.json()) as { result?: { value: Array<ParsedMint | null> } }).result?.value ?? [];
       }),
       fetch(`${JUPITER}?ids=${ids.join(",")}`, { cache: "no-store" })
-        .then(async (r) => (r.ok ? ((await r.json()) as Record<string, { usdPrice?: number; stockData?: { price?: number } }>) : {}))
-        .catch(() => ({}) as Record<string, { usdPrice?: number; stockData?: { price?: number } }>),
+        .then(async (r) =>
+          r.ok ? ((await r.json()) as Record<string, JupiterEntry>) : ({} as Record<string, JupiterEntry>)
+        )
+        .catch(() => ({}) as Record<string, JupiterEntry>),
     ]);
 
     const rows: DividendRow[] = [];
@@ -89,6 +107,7 @@ export async function GET() {
       const newMultiplier = Number(scaled.newMultiplier);
       const pct = multiplier > 0 ? newMultiplier / multiplier - 1 : 0;
       const price = prices[mint]?.stockData?.price ?? prices[mint]?.usdPrice ?? null;
+      const launched = prices[mint]?.createdAt ? Math.floor(Date.parse(prices[mint].createdAt!) / 1000) : null;
       // A multiplier rise from m to n frees (1 - m/n) of the raw tokens backing principal.
       const freedPerShare = newMultiplier > 0 ? 1 - multiplier / newMultiplier : 0;
       rows.push({
@@ -101,6 +120,8 @@ export async function GET() {
         lastDividendPct: pct,
         price,
         lastDividendUsdPerShare: price === null ? null : pct * price,
+        createdAt: launched,
+        annualizedRate: annualize(newMultiplier, launched),
         ytPer100Shares: 100 * freedPerShare,
         ytPer100Usd: price === null ? null : 100 * freedPerShare * price,
         paused: pausable?.paused === true,
