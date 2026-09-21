@@ -3,6 +3,7 @@ import { Figtree, Fraunces } from "next/font/google";
 import localFont from "next/font/local";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import "./globals.css";
+import { Backdrop } from "@/components/Backdrop";
 import { Providers } from "./providers";
 
 // Editorial pairing: a serif display face for headings over a humanist sans for everything else.
@@ -40,10 +41,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${geistMono.variable}`}>
       <body>
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="bg-grid absolute inset-0 [mask-image:radial-gradient(ellipse_70%_55%_at_50%_0%,black,transparent)]" />
-          <div className="absolute -top-48 left-1/2 h-[560px] w-[1000px] -translate-x-1/2 rounded-full bg-emerald-500/[0.09] blur-[120px]" />
-        </div>
+        <Backdrop />
         <Providers>{children}</Providers>
       </body>
     </html>

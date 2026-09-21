@@ -98,6 +98,13 @@ h3 {
 }
 
 @layer utilities {
+  .bg-grid-bright {
+    background-image:
+      linear-gradient(to right, rgba(110, 231, 183, 0.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(110, 231, 183, 0.16) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
   .bg-grid {
     background-image:
       linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),

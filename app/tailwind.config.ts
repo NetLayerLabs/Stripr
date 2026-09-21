@@ -53,6 +53,8 @@ const config: Config = {
         dash: "dash 1.4s linear infinite",
         rise: "rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both",
         "pulse-dot": "pulse-dot 1.6s ease-in-out infinite",
+        "drift-slow": "drift-slow 26s ease-in-out infinite",
+        "drift-slower": "drift-slower 34s ease-in-out infinite",
       },
     },
   },
