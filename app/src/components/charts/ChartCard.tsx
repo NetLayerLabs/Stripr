@@ -31,7 +31,7 @@ export function ChartCard({
     <figure className={cn("card flex min-w-0 flex-col p-5 sm:p-6", className)}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <figcaption className="font-semibold text-white">{title}</figcaption>
+          <figcaption className="font-display text-base text-white">{title}</figcaption>
           {description ? <p className="mt-1 text-xs leading-relaxed text-zinc-500">{description}</p> : null}
         </div>
         <Segmented size="sm" options={VIEWS} value={view} onChange={setView} />

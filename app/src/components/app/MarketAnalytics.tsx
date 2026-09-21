@@ -100,10 +100,13 @@ export function MarketAnalytics({ market }: { market: MarketView }) {
   return (
     <section aria-labelledby="analytics-heading" className="space-y-6">
       <div>
-        <h2 id="analytics-heading" className="text-lg font-semibold text-white">
+        <p className="eyebrow">On-chain record</p>
+        <h2 id="analytics-heading" className="mt-2 text-xl text-white">
           Market analytics
         </h2>
-        <p className="mt-1 text-sm text-zinc-500">Rebuilt from this market’s on-chain Stripr events.</p>
+        <p className="mt-1.5 text-sm text-zinc-500">
+          Every figure below is decoded from this market’s own Stripr events — nothing is precomputed.
+        </p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">

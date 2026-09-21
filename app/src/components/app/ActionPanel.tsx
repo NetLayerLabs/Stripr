@@ -45,7 +45,7 @@ export function ActionPanel({
     <section className="card p-5 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">{COPY[tab].title}</h2>
+          <h2 className="text-lg text-white">{COPY[tab].title}</h2>
           <p className="mt-1 text-sm text-zinc-500">{COPY[tab].description}</p>
         </div>
         <Segmented options={TABS} value={tab} onChange={setTab} />

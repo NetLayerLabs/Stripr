@@ -97,7 +97,8 @@ export function TradePanel({ market, position, actions }: Props) {
     <section aria-labelledby="trade-heading" className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 id="trade-heading" className="text-lg font-semibold text-white">
+          <p className="eyebrow">Order book</p>
+          <h2 id="trade-heading" className="mt-2 text-xl text-white">
             Trade PT and YT
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
