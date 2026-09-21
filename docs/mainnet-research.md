@@ -1,12 +1,12 @@
 # Stripr mainnet launch research (Grok, 14 Sep 2026)
 
-> **Update (19 Sep 2026):** the multiplier-index design (design A in §3) is implemented — `Market::sync_multiplier` in `programs/stripr/src/state.rs` pays reinvested dividends to locked YT — and the hackathon deadline moved to 25 Sep 2026. Cross-check notes below that predate this are historical.
+> **Update (19 Sep 2026):** the multiplier-index design (design A in §3) is implemented - `Market::sync_multiplier` in `programs/stripr/src/state.rs` pays reinvested dividends to locked YT - and the hackathon deadline moved to 25 Sep 2026. Cross-check notes below that predate this are historical.
 
 Research produced by Grok from the Stripr project brief. It has not been independently verified; items marked **Unsure** need confirmation before relying on them. Cross-check notes from the Stripr build are at the end.
 
-Stocklana mainnet launch brief for Stripr — a Pendle-style yield-strip for xStocks on Solana, due Friday 18 Sep 2026, 4:00pm ET.
+Stocklana mainnet launch brief for Stripr - a Pendle-style yield-strip for xStocks on Solana, due Friday 18 Sep 2026, 4:00pm ET.
 
-Hackathon page: hackathons.solana.com/hackathons/stocklana — $100k pool, one judging question: *could this be a real app people will actually use?* Credit & Yield is an explicit wedge.
+Hackathon page: hackathons.solana.com/hackathons/stocklana - $100k pool, one judging question: *could this be a real app people will actually use?* Credit & Yield is an explicit wedge.
 
 ---
 
@@ -38,7 +38,7 @@ xStock-specific Pyth feeds exist. Synth's asset table lists on-chain Pyth produc
 
 **How to fetch**
 
-- Off-chain UI: Hermes HTTP/WS (hermes.pyth.network) — free, no on-chain cost.
+- Off-chain UI: Hermes HTTP/WS (hermes.pyth.network) - free, no on-chain cost.
 - On-chain (if ever needed in-program): Pyth Solana price accounts / push feeds. Switchboard can wrap a Pyth task for a custom pull feed.
 
 **How to value PT / YT (Pendle-style, adapted to Scaled UI)**
@@ -75,8 +75,8 @@ No public forward-calendar API found. Track:
 
 Store on the Market PDA:
 
-- `m_index` — last observed multiplier (scaled, e.g. 1e12)
-- `acc_m_per_yt` — cumulative `ΔM` per locked YT (same O(1) index already used for USDC)
+- `m_index` - last observed multiplier (scaled, e.g. 1e12)
+- `acc_m_per_yt` - cumulative `ΔM` per locked YT (same O(1) index already used for USDC)
 
 On `lock_yt` / `unlock_yt` / `claim_yield` / `strip` / `redeem`:
 
@@ -89,7 +89,7 @@ Because the raw token amount in the vault is constant, YT can't be paid in extra
 
 | Design | What YT receives | Verdict |
 |---|---|---|
-| **A. Synthetic claim on `ΔM`** — YT redeems into extra economic exposure by burning YT against PT + vault accounting | Cleanest Pendle analog | **Recommended.** Redeem path: PT + YT returns raw tokens; unlocked YT can convert accrued `ΔM` into extra PT or a claim token |
+| **A. Synthetic claim on `ΔM`** - YT redeems into extra economic exposure by burning YT against PT + vault accounting | Cleanest Pendle analog | **Recommended.** Redeem path: PT + YT returns raw tokens; unlocked YT can convert accrued `ΔM` into extra PT or a claim token |
 | B. Admin still deposits USDC equal to the net dividend | Matches cash-yield UX | Fights the product. The issuer doesn't pay USDC |
 | C. Rebase YT supply | Ugly with Token-2022 + AMMs | Avoid |
 
@@ -112,9 +112,9 @@ Implementation note: read the multiplier from the mint extension, not from the U
 - Not for US persons. Also commonly excluded: UK, Canada, Australia; some CEX terms also exclude the EEA for their product. Backed's own dApp ToS: public to non-US visitors.
 - The frontend should geo-gate / show a disclaimer. The program can't know citizenship.
 
-**Partner program:** no public "xStocks DeFi partner kit" found. Practical path: ship a clean integration, then email Backed / xStocks + Solana Foundation RWA contacts after Stocklana. Kamino already lists AAPLx markets — existence proof that vaults are tolerated.
+**Partner program:** no public "xStocks DeFi partner kit" found. Practical path: ship a clean integration, then email Backed / xStocks + Solana Foundation RWA contacts after Stocklana. Kamino already lists AAPLx markets - existence proof that vaults are tolerated.
 
-**Permanent delegate + pause — real vault risk**
+**Permanent delegate + pause - real vault risk**
 
 xStocks mints include: permanentDelegate, pausableConfig, scaledUiAmountConfig, transferHook (none set), defaultAccountState, confidential transfer, metadata.
 
@@ -168,7 +168,7 @@ A full OtterSec report won't be ready before Friday. For Stocklana: publish test
 
 ## 6. Liquidity and composability
 
-**PT/YT trading — launch order.** PT and YT aren't memecoins. They should trade close to a no-arbitrage band around the stripped stock.
+**PT/YT trading - launch order.** PT and YT aren't memecoins. They should trade close to a no-arbitrage band around the stripped stock.
 
 1. First pool: PT–xStock or PT–USDC on an Orca Whirlpool or Raydium CLMM, tight fee (1–5 bps), narrow range. Correlated pair → CLMM, not a bonding curve.
 2. YT–USDC on Meteora DLMM if YT is thin and jumpy (dividend events). DLMM bins handle that better than a wide CLMM.
@@ -176,7 +176,7 @@ A full OtterSec report won't be ready before Friday. For Stocklana: publish test
 
 **Jupiter:** listing is permissionless once a supported DEX pool exists. Strict/verified mode needs real liquidity + metadata; no special form guarantees a banner. Jupiter already screens tokenized stocks.
 
-**Kamino:** AAPLx markets already exist (DefiLlama shows an AAPLx Kamino market). PT as collateral is a later conversation with Kamino risk — not a Friday deliverable. Demo a pool + Jupiter route instead.
+**Kamino:** AAPLx markets already exist (DefiLlama shows an AAPLx Kamino market). PT as collateral is a later conversation with Kamino risk - not a Friday deliverable. Demo a pool + Jupiter route instead.
 
 **Listing hygiene:** Metaplex/Token-2022 metadata on PT and YT (name "Stripr PT AAPLx", symbol "ptAAPLx"), unique logos, and a description saying they are claims, not the stock.
 
@@ -215,7 +215,7 @@ solana program show 9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF --url devnet
 
 **What wins Credit & Yield here.** Judges asked for a real app, not a whitepaper. Winning submissions will likely show:
 
-1. A user who holds AAPLx and wants yield or discounted principal — stated in one sentence.
+1. A user who holds AAPLx and wants yield or discounted principal - stated in one sentence.
 2. End-to-end on real xStock mints (even with tiny size), not only mocks.
 3. YT actually capturing `ΔM`, not an admin USDC faucet pretending to be dividends. That is the differentiator vs "we wrapped a stock."
 4. Why Solana: Token-2022 Scaled UI + cheap accounts + 24/7 stock trading that TradFi can't clear.
@@ -228,9 +228,9 @@ solana program show 9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF --url devnet
 | Path | Reality |
 |---|---|
 | Solana Foundation grants | Rolling form, public good + milestone budget. Review ~1 week, decision ~3 weeks. Apply with "open-source yield primitive for xStocks + corporate-action indexer." |
-| Colosseum accelerator | $250k per accepted team, 8 weeks. Can't apply cold; must win a Colosseum hackathon or Eternal. Stocklana is Foundation-run, not Colosseum — don't assume a prize here feeds Cohort 6. |
+| Colosseum accelerator | $250k per accepted team, 8 weeks. Can't apply cold; must win a Colosseum hackathon or Eternal. Stocklana is Foundation-run, not Colosseum - don't assume a prize here feeds Cohort 6. |
 | xStocks / Backed | No public grant page found. Warm intro via Foundation RWA + a Kamino-class integration. |
-| STRIDE / SIRN | Foundation security program — relevant once there is TVL, not this week. |
+| STRIDE / SIRN | Foundation security program - relevant once there is TVL, not this week. |
 
 ---
 
@@ -241,7 +241,7 @@ solana program show 9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF --url devnet
 3. Deploy the same program ID to mainnet, 4 SOL in the deploy key, upgrade authority on a new key to move to Squads after the deadline.
 4. One real AAPLx market with dust TVL + PT/YT metadata.
 5. Disclaimer: non-US, not a securities offering, issuer pause/delegate risk, unaudited.
-6. Pyth (or Hermes) price in the UI only — don't block the demo on an on-chain oracle CPI.
+6. Pyth (or Hermes) price in the UI only - don't block the demo on an on-chain oracle CPI.
 
 ---
 

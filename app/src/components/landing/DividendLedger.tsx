@@ -7,9 +7,9 @@ import { cn } from "@/lib/cn";
 
 const pct = (value: number) => `${(value * 100).toFixed(3)}%`;
 const usd = (value: number | null, digits = 2) =>
-  value === null ? "—" : `$${value.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
+  value === null ? "-" : `$${value.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 const day = (seconds: number) =>
-  seconds > 0 ? new Date(seconds * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
+  seconds > 0 ? new Date(seconds * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-";
 
 function Row({ row, best }: { row: DividendRow; best: number }) {
   const share = best > 0 ? Math.max(row.lastDividendPct / best, 0) : 0;
@@ -115,7 +115,7 @@ export function DividendLedger() {
         {payer ? (
           <>
             {" "}
-            {payer.symbol}&apos;s last one moved holders {pct(payer.lastDividendPct)} — on Stripr that is{" "}
+            {payer.symbol}&apos;s last one moved holders {pct(payer.lastDividendPct)} - on Stripr that is{" "}
             <span className="text-zinc-300">
               {payer.ytPer100Shares.toFixed(4)} {payer.symbol} ({usd(payer.ytPer100Usd)})
             </span>{" "}

@@ -14,7 +14,7 @@ export function Hero() {
         <p className="animate-rise mt-6 max-w-xl text-pretty text-lg leading-relaxed text-zinc-400" style={{ animationDelay: "0.12s" }}>
           xStocks pay dividends by raising a multiplier on the token. Stripr turns that into a yield you can own
           and trade: strip a stock into PT, the claim on the share, and YT, which captures every multiplier
-          increase — read on-chain, no oracle, no admin.
+          increase - read on-chain, no oracle, no admin.
         </p>
         <div className="animate-rise mt-8 flex flex-wrap gap-3" style={{ animationDelay: "0.2s" }}>
           <Link href="/app" className="btn-primary h-12 px-6 text-[15px]">

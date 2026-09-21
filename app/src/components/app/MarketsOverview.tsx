@@ -133,12 +133,12 @@ export function MarketsOverview() {
         />
         <StatTile
           label="Earning positions"
-          value={positions.isPending ? "—" : earningPositions}
+          value={positions.isPending ? "-" : earningPositions}
           sub="Locked YT or unclaimed yield"
         />
         <StatTile
           label="Unique holders"
-          value={positions.isPending ? "—" : positions.data?.holders ?? 0}
+          value={positions.isPending ? "-" : positions.data?.holders ?? 0}
           sub="Wallets with an earning position"
         />
       </div>
@@ -215,7 +215,7 @@ export function MarketsOverview() {
                     </td>
                     <td className="num px-5 py-4 text-right">
                       {row.ytYieldPercent === null ? (
-                        <span className="text-zinc-600">—</span>
+                        <span className="text-zinc-600">-</span>
                       ) : (
                         <span className="text-emerald-300/90">{formatYieldPercent(row.ytYieldPercent)}</span>
                       )}
@@ -228,7 +228,7 @@ export function MarketsOverview() {
                       {formatAmount(market.totalDividends, market.dividend.decimals, 2)}{" "}
                       <span className="text-zinc-500">{market.dividendSymbol}</span>
                     </td>
-                    <td className="num px-5 py-4 text-right text-zinc-200">{positions.isPending ? "—" : row.positions}</td>
+                    <td className="num px-5 py-4 text-right text-zinc-200">{positions.isPending ? "-" : row.positions}</td>
                     <td className="pr-4 text-right">
                       <ChevronRight className="ml-auto h-4 w-4 text-zinc-600" />
                     </td>

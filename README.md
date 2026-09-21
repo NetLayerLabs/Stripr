@@ -13,11 +13,11 @@ Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.c
 
 **Try it in three minutes** (Solana Devnet, no setup):
 
-1. Open the app, pick the **PG** market — it pays both kinds of dividend.
+1. Open the app, pick the **PG** market - it pays both kinds of dividend.
 2. Connect any wallet on Devnet and press **Get test PG + USDC**. You receive 100 PG, 1,000 demo USDC, and a little SOL for fees.
 3. **Strip** 10 PG with "Lock YT to earn" on. One transaction mints 10 PT-PG and 10 YT-PG and locks the YT.
 4. In **Trade PT and YT**, press **Sell**, list 5 YT-PG at any price, and watch it appear in the book as a % of the live PG share price.
-5. Press **Buy** on someone else's listing with "Lock to start earning" on — one transaction buys and locks.
+5. Press **Buy** on someone else's listing with "Lock to start earning" on - one transaction buys and locks.
 6. **Recent activity** shows every step with explorer links, and the charts are rebuilt from those on-chain events.
 
 **Verify it on-chain**
@@ -33,10 +33,10 @@ Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.c
 
 | | Real | Demo |
 |---|---|---|
-| Dividend mechanism | Read from the Token-2022 Scaled UI Amount multiplier, the way xStocks actually pay | — |
-| Mainnet data | Every xStock's multiplier, dividend and price shown live on the landing page | — |
-| Stocks in the markets | — | Team-minted Token-2022 tokens named after the companies, so anyone can strip without owning xStocks |
-| USDC | — | A demo mint, so the faucet can hand out spending money |
+| Dividend mechanism | Read from the Token-2022 Scaled UI Amount multiplier, the way xStocks actually pay | - |
+| Mainnet data | Every xStock's multiplier, dividend and price shown live on the landing page | - |
+| Stocks in the markets | - | Team-minted Token-2022 tokens named after the companies, so anyone can strip without owning xStocks |
+| USDC | - | A demo mint, so the faucet can hand out spending money |
 | Cash dividends (KO, PG markets) | The program instruction is real | Real xStocks only reinvest; a cash payer must deposit the USDC |
 | Trades and positions | Every transaction is on-chain and verifiable | Seeded by our own demo wallets |
 
@@ -115,7 +115,7 @@ A Next.js 14 app (`app/`):
   - Your position.
   - Analytics rebuilt from on-chain events: supply, reinvested and cash dividends, and recent activity.
 - **Trade section:** on each market page, an order book for PT and YT with best prices, lifetime dividends per YT, one-transaction "list" (unlocking first if needed) and "buy & lock", and cancelling your own listings.
-- **Yield on every YT listing:** each stock's Scaled UI Amount multiplier is read on mainnet and annualized since the token launched — PGx has delivered 1.68%/yr, KOx 1.76%, AAPLx 0.26% — so a YT price becomes a yield and a payback period ("8.78 USDC ≈ 28% a year, pays for itself in 3.6 years"). The markets table ranks by it.
+- **Yield on every YT listing:** each stock's Scaled UI Amount multiplier is read on mainnet and annualized since the token launched - PGx has delivered 1.68%/yr, KOx 1.76%, AAPLx 0.26% - so a YT price becomes a yield and a payback period ("8.78 USDC ≈ 28% a year, pays for itself in 3.6 years"). The markets table ranks by it.
 - **Reference prices:** each listing is shown as a percentage of the stock's live price, along with what PT and YT together cost against one share. Prices come from Jupiter's public price API for the matching xStock (no key needed), or from Pyth's equity feeds when `PYTH_API_KEY` has entitlement for them.
 - **Transaction modal:** every action walks through each step and ends with an explorer link.
 - **Network switch:** toggles Devnet and Mainnet. A server-side RPC proxy is used because public mainnet RPC blocks browser requests.

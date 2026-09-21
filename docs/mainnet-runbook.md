@@ -17,7 +17,7 @@ Re-quote after any rebuild: `solana rent $(( $(stat -f %z target/deploy/stripr.s
 ## Before spending anything
 
 1. `export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$HOME/.cargo/bin:$PATH"`
-2. `export MAINNET_RPC_URL="https://mainnet.helius-rpc.com/?api-key=<key>"` — a dedicated RPC; the public endpoint drops the deploy's write transactions.
+2. `export MAINNET_RPC_URL="https://mainnet.helius-rpc.com/?api-key=<key>"` - a dedicated RPC; the public endpoint drops the deploy's write transactions.
 3. `solana --version` must be 4.x (not 2.1.0); `anchor --version` 1.2.0.
 4. Both keys are backed up in `~/.config/solana/backups/` (mode 600). Copy them somewhere offline too.
 5. `solana address -k target/deploy/stripr-keypair.json` → `9wpHm…nzZF`; `solana balance 3EGKfA8W2ocah3Gusox5JRfoN5WVAgXw9hubgyBGXvSy -u "$MAINNET_RPC_URL"` ≥ 2.1.
@@ -25,9 +25,9 @@ Re-quote after any rebuild: `solana rent $(( $(stat -f %z target/deploy/stripr.s
 
 ## Deploy
 
-1. `npm run build:program && stat -f %z target/deploy/stripr.so && shasum -a 256 target/deploy/stripr.so` — record size and hash.
-2. `npm run deploy:mainnet` — builds, then `anchor program deploy --no-idl --use-rpc` through `$MAINNET_RPC_URL` with a priority fee and 20 sign attempts. No IDL upload (the app bundles it; ~0.025 SOL to add later with `anchor idl init`).
-3. `solana program show 9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF -u "$MAINNET_RPC_URL"` — Authority must be the deployer, Data Length must equal the recorded size.
+1. `npm run build:program && stat -f %z target/deploy/stripr.so && shasum -a 256 target/deploy/stripr.so` - record size and hash.
+2. `npm run deploy:mainnet` - builds, then `anchor program deploy --no-idl --use-rpc` through `$MAINNET_RPC_URL` with a priority fee and 20 sign attempts. No IDL upload (the app bundles it; ~0.025 SOL to add later with `anchor idl init`).
+3. `solana program show 9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF -u "$MAINNET_RPC_URL"` - Authority must be the deployer, Data Length must equal the recorded size.
 4. `solana program dump 9wpHm…nzZF /tmp/mainnet.so -u "$MAINNET_RPC_URL"` and compare its hash with step 1.
 5. `solana program show --buffers --buffer-authority 3EGKfA8W2ocah3Gusox5JRfoN5WVAgXw9hubgyBGXvSy -u "$MAINNET_RPC_URL"` must be empty. If a deploy died mid-way: resume with `--buffer <keypair>` or reclaim rent with `solana program close --buffers -k ~/.config/solana/stripr-mainnet-deployer.json -u "$MAINNET_RPC_URL"`.
 6. **Immediately** open the real markets, before announcing the program (initialize_market is permissionless, so the addresses can be squatted): `DRY_RUN=1 npm run open:mainnet:markets` to review the plan, then `DRY_RUN=0 npm run open:mainnet:markets`.

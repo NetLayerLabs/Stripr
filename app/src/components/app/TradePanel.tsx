@@ -77,7 +77,7 @@ export function TradePanel({ market, position, actions }: Props) {
   const bestPt = all.find((offer) => offer.asset === "pt");
   const bestYt = all.find((offer) => offer.asset === "yt");
   const price = (offer: OfferView | undefined) =>
-    offer ? `${formatAmount(offer.price, quoteDecimals, 2)} ${market.dividendSymbol}` : "—";
+    offer ? `${formatAmount(offer.price, quoteDecimals, 2)} ${market.dividendSymbol}` : "-";
   const shareSub = (offer: OfferView | undefined, fallback: string) => {
     const percent = offer ? shareOfStockPrice(market, offer.price, stock) : null;
     return percent === null ? fallback : `${formatPercent(percent)} of the share price`;
@@ -135,7 +135,7 @@ export function TradePanel({ market, position, actions }: Props) {
         ) : (
           <StatTile
             label="Open listings"
-            value={offers.isPending ? "—" : all.length}
+            value={offers.isPending ? "-" : all.length}
             sub={`${all.filter((offer) => offer.asset === "yt").length} YT · ${all.filter((offer) => offer.asset === "pt").length} PT`}
           />
         )}
@@ -151,7 +151,7 @@ export function TradePanel({ market, position, actions }: Props) {
         <StatTile label="Best PT price" value={price(bestPt)} sub={shareSub(bestPt, "The share without dividends")} />
         <StatTile
           label="Paid per YT so far"
-          value={earnedParts.length ? earnedParts.join(" + ") : "—"}
+          value={earnedParts.length ? earnedParts.join(" + ") : "-"}
           sub={paidUsd !== null && paidUsd > 0 ? `≈ ${formatUsd(paidUsd)} per YT at the reference price` : "Lifetime dividends per share"}
         />
       </div>
@@ -277,7 +277,7 @@ function OrderBook({
                       <td className="num px-5 py-3 text-right text-zinc-400">
                         {(() => {
                           const percent = shareOfStockPrice(market, offer.price, stock);
-                          return percent === null ? "—" : formatPercent(percent);
+                          return percent === null ? "-" : formatPercent(percent);
                         })()}
                       </td>
                     ) : null}
@@ -285,7 +285,7 @@ function OrderBook({
                       <td className="num px-5 py-3 text-right text-emerald-300/90">
                         {(() => {
                           const y = ytYield(market, offer.price, stock);
-                          return y === null ? "—" : formatYieldPercent(y.annualPercent);
+                          return y === null ? "-" : formatYieldPercent(y.annualPercent);
                         })()}
                       </td>
                     ) : null}
@@ -409,13 +409,13 @@ function BuyForm({
             label={`Share of the ${market.symbol} price`}
             value={(() => {
               const percent = shareOfStockPrice(market, offer.price, stock);
-              return percent === null ? "—" : formatPercent(percent);
+              return percent === null ? "-" : formatPercent(percent);
             })()}
           />
         ) : null}
         <Row
           label={`Your ${market.dividendSymbol}`}
-          value={position ? formatAmount(position.dividend, market.dividend.decimals, 2) : "—"}
+          value={position ? formatAmount(position.dividend, market.dividend.decimals, 2) : "-"}
         />
       </div>
       {asset === "yt" ? (
@@ -507,7 +507,7 @@ function SellForm({
             label={`Your price vs the ${market.symbol} share`}
             value={(() => {
               const percent = shareOfStockPrice(market, price, stock);
-              return percent === null ? "—" : `${formatPercent(percent)} (${formatUsd(stock.price)} share)`;
+              return percent === null ? "-" : `${formatPercent(percent)} (${formatUsd(stock.price)} share)`;
             })()}
           />
         ) : null}

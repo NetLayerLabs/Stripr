@@ -16,10 +16,10 @@ export function ProtocolStats() {
     : 0n;
 
   const stats = [
-    { label: "Live markets", value: isError ? "—" : String(markets.length), live: true },
+    { label: "Live markets", value: isError ? "-" : String(markets.length), live: true },
     {
       label: "Dividends paid",
-      value: primary ? `${formatAmount(dividends, primary.dividend.decimals, 2)} ${primary.dividendSymbol}` : "—",
+      value: primary ? `${formatAmount(dividends, primary.dividend.decimals, 2)} ${primary.dividendSymbol}` : "-",
       live: true,
     },
     {

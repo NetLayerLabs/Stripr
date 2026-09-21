@@ -105,7 +105,7 @@ export function MarketAnalytics({ market }: { market: MarketView }) {
           Market analytics
         </h2>
         <p className="mt-1.5 text-sm text-zinc-500">
-          Every figure below is decoded from this market’s own Stripr events — nothing is precomputed.
+          Every figure below is decoded from this market’s own Stripr events - nothing is precomputed.
         </p>
       </div>
 

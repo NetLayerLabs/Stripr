@@ -1,4 +1,4 @@
-# 🏆 STRIPR — Pendle for Tokenized Stocks (Yield Stripping Protocol)
+# 🏆 STRIPR - Pendle for Tokenized Stocks (Yield Stripping Protocol)
 
 > **Stocklana Hackathon Submission ($100,000 Prize Pool)**  
 > **Host:** Solana Foundation & Colosseum (`hackathons.solana.com/hackathons/stocklana`)  

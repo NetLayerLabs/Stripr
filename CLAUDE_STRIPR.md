@@ -1,4 +1,4 @@
-# 🛡️ CLAUDE Context Directives — STRIPR
+# 🛡️ CLAUDE Context Directives - STRIPR
 
 Please read `STRIPR_PROJECT_SPEC.md` to understand the architecture and goals for the Stocklana Hackathon.
 

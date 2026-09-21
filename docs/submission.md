@@ -11,7 +11,7 @@
 
 ## One-liner
 
-Stripr is an on-chain primitive that turns the way xStocks actually pay dividends — a rising Token-2022 Scaled UI Amount multiplier — into a separately owned, tradeable yield token. Strip a stock into PT (the share) and YT (its dividends); locked YT captures every multiplier increase automatically, and an on-chain offer book prices YT in USDC.
+Stripr is an on-chain primitive that turns the way xStocks actually pay dividends - a rising Token-2022 Scaled UI Amount multiplier - into a separately owned, tradeable yield token. Strip a stock into PT (the share) and YT (its dividends); locked YT captures every multiplier increase automatically, and an on-chain offer book prices YT in USDC.
 
 ## The problem
 
@@ -25,7 +25,7 @@ xStocks pay dividends by raising a multiplier on the token, so the value arrives
 
 **A holder of a dividend-paying xStock** (KOx, PGx, JNJx pay real quarterly dividends; AAPLx barely does) strips it, keeps PT for the price exposure, and lists YT for USDC. **A yield buyer** takes the YT at a fraction of the share price and locks it; every multiplier increase the issuer publishes from then on is paid to them in stock, with no oracle or admin in the loop. **Builders** get PT and YT as plain SPL tokens to compose into structured products, lending collateral or a future AMM.
 
-We say this plainly: with no maturity date and a fixed-price book, PT and YT don't yet have a principled price, and on low-yield stocks the dividend is small. Maturity-dated series and an AMM are the stated next step; the primitive underneath — multiplier in, tradeable yield out — is what this submission is.
+We say this plainly: with no maturity date and a fixed-price book, PT and YT don't yet have a principled price, and on low-yield stocks the dividend is small. Maturity-dated series and an AMM are the stated next step; the primitive underneath - multiplier in, tradeable yield out - is what this submission is.
 
 ## How it works
 
