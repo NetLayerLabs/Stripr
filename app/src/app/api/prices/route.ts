@@ -145,10 +145,18 @@ type JupiterEntry = {
   usdPrice?: number;
   stockData?: { price?: number; updatedAt?: string };
   createdAt?: string;
-  scaledUiConfig?: { multiplier?: number; newMultiplier?: number };
+  scaledUiConfig?: { multiplier?: number; newMultiplier?: number; newMultiplierEffectiveAt?: string };
 };
 
-/** Total multiplier growth since launch, annualized. */
+/** The multiplier in force right now: a scheduled one only counts once its timestamp passes. */
+function effectiveMultiplier(config: JupiterEntry["scaledUiConfig"]): number | undefined {
+  if (!config) return undefined;
+  const effectiveAt = config.newMultiplierEffectiveAt ? Date.parse(config.newMultiplierEffectiveAt) : NaN;
+  if (config.newMultiplier && Number.isFinite(effectiveAt) && Date.now() >= effectiveAt) return config.newMultiplier;
+  return config.multiplier ?? config.newMultiplier;
+}
+
+/** Total growth of the in-force multiplier since launch, annualized. */
 function annualize(multiplier: number | undefined, createdAt: string | undefined): number | null {
   if (!multiplier || multiplier <= 1 || !createdAt) return null;
   const days = (Date.now() - Date.parse(createdAt)) / 86_400_000;
@@ -176,7 +184,7 @@ async function fromJupiter(): Promise<Record<string, StockPrice>> {
       confidence: 0,
       publishTime: Number.isFinite(updated) ? Math.floor(updated / 1000) : Math.floor(Date.now() / 1000),
       source: "jupiter",
-      annualizedRate: annualize(entry.scaledUiConfig?.newMultiplier, entry.createdAt),
+      annualizedRate: annualize(effectiveMultiplier(entry.scaledUiConfig), entry.createdAt),
       roundTheClock: false,
       marketOpen: null,
       nextOpen: null,
@@ -194,7 +202,15 @@ export async function GET() {
     try {
       const outcome = await fromPyth(key);
       if ("prices" in outcome && Object.keys(outcome.prices).length > 0) {
-        const body: PricesResponse = { enabled: true, prices: outcome.prices, source: "pyth" };
+        // Pyth has no multiplier, so the dividend rate still comes from the token itself.
+        const rates = await fromJupiter().catch(() => ({}) as Record<string, StockPrice>);
+        const prices = Object.fromEntries(
+          Object.entries(outcome.prices).map(([symbol, price]) => [
+            symbol,
+            { ...price, annualizedRate: rates[symbol]?.annualizedRate ?? null },
+          ])
+        );
+        const body: PricesResponse = { enabled: true, prices, source: "pyth" };
         cache = { at: Date.now(), body };
         return NextResponse.json(body);
       }

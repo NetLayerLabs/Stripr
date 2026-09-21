@@ -316,8 +316,7 @@ export async function fetchOffers(connection: Connection, market: MarketView): P
 }
 
 /** Every open offer across all markets, cheapest first, grouped by market address. */
-export async function fetchAllOffers(connection: Connection, cluster: Cluster): Promise<Map<string, OfferView[]>> {
-  const markets = await fetchMarkets(connection, cluster);
+export async function fetchAllOffers(connection: Connection, markets: MarketView[]): Promise<Map<string, OfferView[]>> {
   const byPtMint = new Map(markets.map((market) => [market.account.ptMint.toBase58(), market.address.toBase58()]));
   const byYtMint = new Map(markets.map((market) => [market.account.ytMint.toBase58(), market.address.toBase58()]));
   const program = getProgram(connection);

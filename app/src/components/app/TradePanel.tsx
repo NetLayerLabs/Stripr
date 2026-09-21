@@ -11,6 +11,7 @@ import { formatAmount, parseAmount, pow10, shortAddress } from "@/lib/format";
 import {
   formatPercent,
   formatUsd,
+  formatYieldPercent,
   paidPerYtUsd,
   paybackPercent,
   shareOfStockPrice,
@@ -143,7 +144,7 @@ export function TradePanel({ market, position, actions }: Props) {
           value={price(bestYt)}
           sub={
             bestYtYield
-              ? `≈ ${formatPercent(bestYtYield.annualPercent)} a year at ${market.symbol}'s realized dividend rate`
+              ? `≈ ${formatYieldPercent(bestYtYield.annualPercent)} a year at ${market.symbol}'s realized dividend rate`
               : shareSub(bestYt, "Future dividends, per share")
           }
         />
@@ -284,7 +285,7 @@ function OrderBook({
                       <td className="num px-5 py-3 text-right text-emerald-300/90">
                         {(() => {
                           const y = ytYield(market, offer.price, stock);
-                          return y === null ? "—" : formatPercent(y.annualPercent);
+                          return y === null ? "—" : formatYieldPercent(y.annualPercent);
                         })()}
                       </td>
                     ) : null}
@@ -366,9 +367,11 @@ function BuyForm({
   const buyYield = asset === "yt" ? ytYield(market, offer.price, stock) : null;
   const blockedLabel = own
     ? "This is your listing"
-    : position && cost > position.dividend
-      ? `Insufficient ${market.dividendSymbol}`
-      : undefined;
+    : !position
+      ? "Loading balances…"
+      : cost > position.dividend
+        ? `Insufficient ${market.dividendSymbol}`
+        : undefined;
 
   async function submit() {
     if (amount && offer && (await actions.buyOffer(offer, amount, lock))) setValue("");
@@ -392,7 +395,7 @@ function BuyForm({
         {asset === "yt" && buyYield ? (
           <Row
             label="Yield at this price"
-            value={`${formatPercent(buyYield.annualPercent)} a year · pays for itself in ${buyYield.paybackYears.toFixed(1)} yrs`}
+            value={`${formatYieldPercent(buyYield.annualPercent)} a year · pays for itself in ${buyYield.paybackYears.toFixed(1)} yrs`}
           />
         ) : null}
         {asset === "yt" && paidUsd !== null && paidUsd > 0 ? (
@@ -491,7 +494,7 @@ function SellForm({
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
         <Row label="You receive when it sells" value={`${formatAmount(proceeds, quoteDecimals, 2)} ${market.dividendSymbol}`} />
         {asset === "yt" && sellYield ? (
-          <Row label="Yield you're offering" value={`${formatPercent(sellYield.annualPercent)} a year to the buyer`} />
+          <Row label="Yield you're offering" value={`${formatYieldPercent(sellYield.annualPercent)} a year to the buyer`} />
         ) : null}
         {asset === "yt" && price && paidUsd !== null && paidUsd > 0 ? (
           <Row

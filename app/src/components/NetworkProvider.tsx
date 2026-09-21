@@ -40,7 +40,16 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
       // Storage can be unavailable (private mode); fall back to the default.
     }
     const initial = fromUrl ?? stored;
-    if (initial) setClusterState(initial);
+    if (!initial) return;
+    setClusterState(initial);
+    // A shared ?network= link should still hold after a refresh.
+    if (fromUrl) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, fromUrl);
+      } catch {
+        // Not persisted; the link still applies for this visit.
+      }
+    }
   }, []);
 
   const setCluster = useCallback((next: Cluster) => {

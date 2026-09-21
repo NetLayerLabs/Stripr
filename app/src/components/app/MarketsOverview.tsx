@@ -12,7 +12,7 @@ import { usePositionCounts } from "@/hooks/usePositionCounts";
 import { cn } from "@/lib/cn";
 import { useNetwork } from "@/components/NetworkProvider";
 import { formatAmount, formatShare } from "@/lib/format";
-import { formatPercent, ytYield } from "@/lib/prices";
+import { formatYieldPercent, ytYield } from "@/lib/prices";
 import { sharesForRaw, type MarketView } from "@/lib/stripr";
 import { DashboardSkeleton, ErrorState, NoMarkets } from "./States";
 
@@ -57,7 +57,7 @@ export function MarketsOverview() {
   const markets = useMarkets();
   const positions = usePositionCounts();
   const prices = usePrices();
-  const offersByMarket = useOffersByMarket();
+  const offersByMarket = useOffersByMarket(markets.data);
   const [sort, setSort] = useState<{ key: SortKey; direction: Direction }>({ key: "stripped", direction: "desc" });
 
   const rows = useMemo<Row[]>(
@@ -177,7 +177,8 @@ export function MarketsOverview() {
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {sorted.map((row) => {
-                const href = `/app/markets/${row.address}`;
+                // Carry the network so the link works when shared or refreshed.
+                const href = `/app/markets/${row.address}?network=${cluster}`;
                 const { market } = row;
                 return (
                   <tr
@@ -216,7 +217,7 @@ export function MarketsOverview() {
                       {row.ytYieldPercent === null ? (
                         <span className="text-zinc-600">—</span>
                       ) : (
-                        <span className="text-emerald-300/90">{formatPercent(row.ytYieldPercent)}</span>
+                        <span className="text-emerald-300/90">{formatYieldPercent(row.ytYieldPercent)}</span>
                       )}
                     </td>
                     <td className="num px-5 py-4 text-right text-zinc-200">

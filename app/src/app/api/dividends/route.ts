@@ -106,6 +106,8 @@ export async function GET() {
       const multiplier = Number(scaled.multiplier);
       const newMultiplier = Number(scaled.newMultiplier);
       const pct = multiplier > 0 ? newMultiplier / multiplier - 1 : 0;
+      // A scheduled multiplier only counts once its timestamp passes.
+      const inForce = scaled.newMultiplierEffectiveTimestamp * 1000 <= Date.now() ? newMultiplier : multiplier;
       const price = prices[mint]?.stockData?.price ?? prices[mint]?.usdPrice ?? null;
       const launched = prices[mint]?.createdAt ? Math.floor(Date.parse(prices[mint].createdAt!) / 1000) : null;
       // A multiplier rise from m to n frees (1 - m/n) of the raw tokens backing principal.
@@ -121,7 +123,7 @@ export async function GET() {
         price,
         lastDividendUsdPerShare: price === null ? null : pct * price,
         createdAt: launched,
-        annualizedRate: annualize(newMultiplier, launched),
+        annualizedRate: annualize(inForce, launched),
         ytPer100Shares: 100 * freedPerShare,
         ytPer100Usd: price === null ? null : 100 * freedPerShare * price,
         paused: pausable?.paused === true,

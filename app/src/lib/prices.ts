@@ -73,5 +73,8 @@ export function splitVsStock(market: MarketView, offers: OfferView[], stock: Sto
 export const formatUsd = (value: number, maxFraction = 2) =>
   `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: maxFraction })}`;
 
+/** A near-zero listing yields thousands of percent; say so rather than print it. */
+export const formatYieldPercent = (value: number) => (value > 1000 ? ">1,000%" : formatPercent(value));
+
 export const formatPercent = (value: number, maxFraction = 1) =>
   `${value.toLocaleString("en-US", { maximumFractionDigits: maxFraction })}%`;
