@@ -1,4 +1,5 @@
 import { Blocks, Building2, Zap } from "lucide-react";
+import { DividendLedger } from "./DividendLedger";
 import { LiveXStock } from "./LiveXStock";
 import { Section } from "./Section";
 
@@ -29,6 +30,9 @@ export function WhySolana() {
       description="Dividends touch every holder of a stock. Solana makes that practical on-chain, and the tokenized stocks are already here."
       tinted
     >
+      <div className="mb-6">
+        <DividendLedger />
+      </div>
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="grid gap-4">
           {REASONS.map(({ icon: Icon, title, body }) => (

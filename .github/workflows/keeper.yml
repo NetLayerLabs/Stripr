@@ -1,0 +1,35 @@
+name: Demo dividend keeper
+
+# Pays a small reinvested dividend on the devnet AAPL demo market every hour, so a
+# visitor who strips and locks sees a claim appear without anyone on the team acting.
+# Dormant until the DEVNET_ADMIN_KEY secret (the demo mint authority) is set.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+jobs:
+  reinvest:
+    if: ${{ vars.KEEPER_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Write the admin key
+        run: |
+          mkdir -p ~/.config/solana
+          echo "$DEVNET_ADMIN_KEY" > ~/.config/solana/keeper.json
+        env:
+          DEVNET_ADMIN_KEY: ${{ secrets.DEVNET_ADMIN_KEY }}
+      - name: Raise the AAPL multiplier by 0.05% and sync the market
+        run: npx tsx scripts/reinvest-dividend.ts
+        env:
+          ANCHOR_PROVIDER_URL: ${{ secrets.DEVNET_RPC_URL || 'https://api.devnet.solana.com' }}
+          ANCHOR_WALLET: /home/runner/.config/solana/keeper.json
+          SYMBOL: AAPL
+          RATE: "0.0005"

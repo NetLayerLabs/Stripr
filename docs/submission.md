@@ -9,20 +9,21 @@
 
 ## One-liner
 
-Stripr splits a tokenized stock into its principal (PT) and its dividends (YT), so holders can sell future dividends for USDC today and income investors can buy only the dividend stream.
+Stripr is an on-chain primitive that turns the way xStocks actually pay dividends — a rising Token-2022 Scaled UI Amount multiplier — into a separately owned, tradeable yield token. Strip a stock into PT (the share) and YT (its dividends); locked YT captures every multiplier increase automatically, and an on-chain offer book prices YT in USDC.
 
 ## The problem
 
-Tokenized stocks like xStocks already trade on Solana. But a share's two parts are still bundled, just like in a brokerage account:
+xStocks pay dividends by raising a multiplier on the token, so the value arrives silently, blended into every holder's balance. Nothing on Solana lets that dividend be owned, priced or traded on its own:
 
-- A long-term holder who doesn't need income can't turn years of small dividends into cash today without selling the share.
-- An income investor can't buy a stock's dividends without paying for the whole share and taking its price risk.
+- A holder who wants the share but not the income has no way to sell the income.
+- An investor who wants dividend exposure has to buy the whole share and take its price risk.
+- Nobody can see what a stock's dividend stream is worth, because there is no market for it.
 
 ## Who uses it
 
-**Maya, a long-term AAPLx holder.** She strips 100 AAPLx into 100 PT-AAPL and 100 YT-AAPL. She keeps PT, which is her claim on the shares, and lists the YT for USDC. When it sells she has cash today, and she still owns the shares' price exposure.
+**A holder of a dividend-paying xStock** (KOx, PGx, JNJx pay real quarterly dividends; AAPLx barely does) strips it, keeps PT for the price exposure, and lists YT for USDC. **A yield buyer** takes the YT at a fraction of the share price and locks it; every multiplier increase the issuer publishes from then on is paid to them in stock, with no oracle or admin in the loop. **Builders** get PT and YT as plain SPL tokens to compose into structured products, lending collateral or a future AMM.
 
-**Dan, an income investor.** He buys Maya's YT-AAPL for a fraction of the share price and locks it in the same transaction. Every dividend AAPLx pays from then on flows to him.
+We say this plainly: with no maturity date and a fixed-price book, PT and YT don't yet have a principled price, and on low-yield stocks the dividend is small. Maturity-dated series and an AMM are the stated next step; the primitive underneath — multiplier in, tradeable yield out — is what this submission is.
 
 ## How it works
 
