@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 import { CLUSTERS, CLUSTER_LABELS, type Cluster } from "@/lib/config";
 
 const DESCRIPTIONS: Record<Cluster, string> = {
-  devnet: "Demo markets with test tokens",
+  devnet: "Try it free with test tokens",
   "mainnet-beta": "Real xStocks · unaudited",
 };
 
