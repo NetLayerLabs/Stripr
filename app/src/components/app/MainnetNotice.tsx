@@ -1,10 +1,16 @@
 "use client";
 
-import { TriangleAlert } from "lucide-react";
+import { TriangleAlert, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNetwork } from "@/components/NetworkProvider";
 
 const ACK_KEY = "stripr:mainnet-ack";
+/**
+ * Separate from the acknowledgement: the dialog is the gate a visitor has to pass,
+ * the banner is the reminder that follows them around. Dismissing the reminder
+ * doesn't un-acknowledge the risks.
+ */
+const BANNER_KEY = "stripr:mainnet-banner-dismissed";
 
 const POINTS = [
   "Stripr is an unaudited hackathon build. Use amounts you can afford to lose.",
@@ -13,11 +19,19 @@ const POINTS = [
   "xStocks aren’t offered in some jurisdictions, including to US persons. It’s your responsibility to check yours.",
 ];
 
-function readAck() {
+function readFlag(key: string) {
   try {
-    return window.localStorage.getItem(ACK_KEY) === "1";
+    return window.localStorage.getItem(key) === "1";
   } catch {
     return false;
+  }
+}
+
+function writeFlag(key: string) {
+  try {
+    window.localStorage.setItem(key, "1");
+  } catch {
+    // Not persisted; the notice comes back next visit, which is the safe way to fail.
   }
 }
 
@@ -25,11 +39,13 @@ function readAck() {
 export function MainnetNotice() {
   const { cluster, setCluster } = useNetwork();
   const [acknowledged, setAcknowledged] = useState(true);
+  const [bannerDismissed, setBannerDismissed] = useState(true);
   const primary = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (cluster !== "mainnet-beta") return;
-    setAcknowledged(readAck());
+    setAcknowledged(readFlag(ACK_KEY));
+    setBannerDismissed(readFlag(BANNER_KEY));
   }, [cluster]);
 
   useEffect(() => {
@@ -39,26 +55,37 @@ export function MainnetNotice() {
   if (cluster !== "mainnet-beta") return null;
 
   function acknowledge() {
-    try {
-      window.localStorage.setItem(ACK_KEY, "1");
-    } catch {
-      // Not persisted; the dialog will show again next visit.
-    }
+    writeFlag(ACK_KEY);
     setAcknowledged(true);
+  }
+
+  function dismissBanner() {
+    writeFlag(BANNER_KEY);
+    setBannerDismissed(true);
   }
 
   return (
     <>
-      <div className="border-b border-amber-300/15 bg-amber-300/[0.06]">
-        <p className="mx-auto flex max-w-page items-start gap-2.5 px-4 py-3 text-xs leading-relaxed text-amber-100/90 sm:px-6">
-          <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
-          <span>
-            You’re on Solana Mainnet with real assets. Stripr hasn’t been audited, and xStocks issuers can pause
-            transfers or move tokens held in any account, including Stripr’s vaults. xStocks aren’t offered in some
-            jurisdictions, including the US. Only use amounts you can afford to lose.
-          </span>
-        </p>
-      </div>
+      {!bannerDismissed ? (
+        <div className="border-b border-amber-300/15 bg-amber-300/[0.06]">
+          <div className="mx-auto flex max-w-page items-start gap-2.5 px-4 py-3 sm:px-6">
+            <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
+            <p className="min-w-0 flex-1 text-xs leading-relaxed text-amber-100/90">
+              You’re on Solana Mainnet with real assets. Stripr hasn’t been audited, and xStocks issuers can pause
+              transfers or move tokens held in any account, including Stripr’s vaults. xStocks aren’t offered in some
+              jurisdictions, including the US. Only use amounts you can afford to lose.
+            </p>
+            <button
+              type="button"
+              onClick={dismissBanner}
+              aria-label="Dismiss the mainnet notice"
+              className="-mr-1 -mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-amber-200/60 transition-colors hover:bg-amber-300/10 hover:text-amber-100"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {!acknowledged ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink-950/80 p-4 backdrop-blur-sm">
