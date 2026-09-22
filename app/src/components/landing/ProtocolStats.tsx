@@ -3,24 +3,36 @@
 import { SolanaMark } from "@/components/SolanaMark";
 import { useMarkets } from "@/hooks/useMarkets";
 import { useNetwork } from "@/components/NetworkProvider";
-import { formatAmount } from "@/lib/format";
 
 export function ProtocolStats() {
   const { data, isPending, isError } = useMarkets();
   const { label } = useNetwork();
   const markets = data ?? [];
-  const primary = markets[0];
-  const dividends = primary
-    ? markets
-        .filter((market) => market.account.dividendMint.equals(primary.account.dividendMint))
-        .reduce((sum, market) => sum + market.totalDividends, 0n)
-    : 0n;
+
+  /**
+   * What share of the stock people have stripped has its YT locked and earning.
+   *
+   * The headline used to be cash dividends, which on mainnet is structurally
+   * always zero: xStocks pay by raising a multiplier on the token, never by
+   * sending USDC, so that figure measured the one thing these stocks don't do.
+   * Share units across different stocks aren't the same thing, but the ratio of
+   * locked to stripped is the number this page is actually about.
+   */
+  const stripped = markets.reduce(
+    (sum, market) => sum + Number(market.totalStripped) / 10 ** market.underlying.decimals,
+    0
+  );
+  const locked = markets.reduce(
+    (sum, market) => sum + Number(market.totalYtLocked) / 10 ** market.underlying.decimals,
+    0
+  );
+  const earningShare = stripped > 0 ? locked / stripped : null;
 
   const stats = [
     { label: "Live markets", value: isError ? "-" : String(markets.length), live: true },
     {
-      label: "Dividends paid",
-      value: primary ? `${formatAmount(dividends, primary.dividend.decimals, 2)} ${primary.dividendSymbol}` : "-",
+      label: "YT earning",
+      value: earningShare === null ? "-" : `${(earningShare * 100).toFixed(earningShare >= 0.1 ? 0 : 1)}%`,
       live: true,
     },
     {
