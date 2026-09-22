@@ -17,14 +17,15 @@ const PHASES: Array<{ phase: string; title: string; items: Array<{ status: Statu
       { status: "done", text: "On-chain offer book to sell future dividends (YT) or principal (PT) for USDC" },
       { status: "done", text: "End-to-end tests with a real AAPLx market and an xStock-like Token-2022 mint" },
       { status: "done", text: "Devnet markets with on-chain analytics and a test-token faucet" },
+      { status: "done", text: "Network switch between Devnet and Mainnet in the app" },
+      { status: "done", text: "Deployed on Solana mainnet with the real AAPLx xStocks market" },
     ],
   },
   {
     phase: "Next",
-    title: "Mainnet xStocks",
+    title: "More markets",
     items: [
-      { status: "active", text: "Network switch between Devnet and Mainnet in the app" },
-      { status: "planned", text: "Mainnet deployment with real xStocks markets (AAPLx, SPYx, NVDAx, TSLAx, MSFTx)" },
+      { status: "active", text: "More mainnet markets (SPYx, NVDAx, TSLAx, MSFTx)" },
       { status: "planned", text: "Permissionless keeper that syncs multipliers when issuers update them" },
     ],
   },
@@ -34,7 +35,7 @@ const PHASES: Array<{ phase: string; title: string; items: Array<{ status: Statu
     items: [
       { status: "planned", text: "Maturity-dated PT and YT series" },
       { status: "planned", text: "PT/YT AMM with an implied dividend yield" },
-      { status: "planned", text: "Independent security audit, then mainnet" },
+      { status: "planned", text: "Independent security audit" },
     ],
   },
 ];
