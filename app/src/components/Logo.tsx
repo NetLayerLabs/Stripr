@@ -1,17 +1,19 @@
-export function Logo({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <rect x="2" y="6" width="22" height="9" rx="4.5" fill="#7dd3fc" />
-      <rect x="8" y="17" width="22" height="9" rx="4.5" fill="#34d399" />
-    </svg>
-  );
-}
+import Image from "next/image";
+import headerMark from "../../public/stripr-header.png";
 
+/**
+ * The Stripr wordmark. It ships as one image because the mark and the lettering
+ * are drawn as a single piece; splitting them would drift apart at small sizes.
+ * Height is fixed and the width follows, so the ribbon never squashes.
+ */
 export function Wordmark() {
   return (
-    <span className="flex items-center gap-2.5">
-      <Logo className="h-7 w-7" />
-      <span className="text-[17px] font-semibold tracking-tight text-white">Stripr</span>
-    </span>
+    <Image
+      src={headerMark}
+      alt="Stripr"
+      priority
+      className="h-7 w-auto"
+      sizes="200px"
+    />
   );
 }
