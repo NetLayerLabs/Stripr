@@ -10,8 +10,9 @@ export const CLUSTER_LABELS: Record<Cluster, string> = {
 export const parseCluster = (value: string | null | undefined): Cluster | null =>
   value === "devnet" || value === "mainnet-beta" ? value : null;
 
-/** Network shown before a visitor picks one. */
-export const DEFAULT_CLUSTER: Cluster = parseCluster(process.env.NEXT_PUBLIC_SOLANA_CLUSTER) ?? "devnet";
+/** Network shown before a visitor picks one: the real markets, with devnet a switch away. */
+export const DEFAULT_CLUSTER: Cluster =
+  parseCluster(process.env.NEXT_PUBLIC_SOLANA_CLUSTER) ?? "mainnet-beta";
 
 /**
  * RPC the browser talks to. The public mainnet RPC rejects browser requests, so mainnet
