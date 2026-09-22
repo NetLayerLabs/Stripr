@@ -1,5 +1,6 @@
 "use client";
 
+import { SolanaMark } from "@/components/SolanaMark";
 import { useMarkets } from "@/hooks/useMarkets";
 import { useNetwork } from "@/components/NetworkProvider";
 import { formatAmount } from "@/lib/format";
@@ -25,10 +26,10 @@ export function ProtocolStats() {
     {
       label: "Network",
       value: (
-        <>
-          <span className="hidden sm:inline">Solana </span>
-          {label}
-        </>
+        <span className="flex items-center gap-2">
+          <SolanaMark className="h-4 w-4 shrink-0" />
+          <span className="truncate">{label}</span>
+        </span>
       ),
       live: false,
     },
