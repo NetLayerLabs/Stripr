@@ -19,7 +19,14 @@ type NetworkApi = {
 };
 
 const NetworkContext = createContext<NetworkApi | null>(null);
-const STORAGE_KEY = "stripr:network";
+/**
+ * Versioned so the one-time switch of the default to mainnet retires choices made
+ * back when devnet was the only network with markets. A visitor who picks a network
+ * from here on keeps it; nobody stays pinned to a preference formed before the
+ * mainnet markets existed.
+ */
+const STORAGE_KEY = "stripr:network:v2";
+const LEGACY_STORAGE_KEYS = ["stripr:network"];
 
 export function useNetwork() {
   const api = useContext(NetworkContext);
@@ -36,6 +43,8 @@ export function NetworkProvider({ children }: { children: ReactNode }) {
     let stored: Cluster | null = null;
     try {
       stored = parseCluster(window.localStorage.getItem(STORAGE_KEY));
+      // Drop pre-mainnet choices rather than leaving them to shadow the default forever.
+      for (const key of LEGACY_STORAGE_KEYS) window.localStorage.removeItem(key);
     } catch {
       // Storage can be unavailable (private mode); fall back to the default.
     }
