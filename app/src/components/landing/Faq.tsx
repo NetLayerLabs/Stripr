@@ -37,7 +37,7 @@ const QUESTIONS = [
   },
   {
     q: "Is Stripr on mainnet? Is it audited?",
-    a: "The live demo runs on Solana Devnet with test tokens. The app already switches between Devnet and Mainnet, and mainnet xStocks markets are next. Stripr hasn’t been audited, so treat any mainnet use as experimental.",
+    a: "Yes. The program is deployed on Solana mainnet and the AAPLx market is open, with real xStocks and real USDC. Devnet stays one click away in the header if you’d rather try it with test tokens first. Stripr hasn’t been audited, so treat mainnet use as experimental and start small.",
   },
 ];
 

@@ -15,7 +15,7 @@ const ITEMS = [
   },
   {
     label: "Status",
-    body: "Live on Devnet with five demo markets and order books. 19 end-to-end and 8 unit tests pass, including the real AAPLx mint. Not yet audited.",
+    body: "Live on Solana mainnet with the real AAPLx market, and on Devnet with five demo markets and order books. 19 end-to-end and 8 unit tests pass. Not yet audited.",
   },
 ];
 
