@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { brandGlyph } from "@/components/BrandGlyphs";
 import { cn } from "@/lib/cn";
 
 export type TokenKind = "stock" | "pt" | "yt" | "usd";
@@ -25,6 +26,7 @@ export function TokenIcon({
   symbol: string;
   size?: keyof typeof ICON_SIZES;
 }) {
+  const Brand = kind === "stock" ? brandGlyph(symbol) : null;
   const glyph = kind === "pt" ? "PT" : kind === "yt" ? "YT" : kind === "usd" ? "$" : symbol.slice(0, 1);
   return (
     <span
@@ -35,7 +37,7 @@ export function TokenIcon({
         TOKEN_TONES[kind]
       )}
     >
-      {glyph}
+      {Brand ? <Brand className="h-[55%] w-auto" /> : glyph}
     </span>
   );
 }
