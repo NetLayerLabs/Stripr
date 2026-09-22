@@ -1,5 +1,8 @@
 # Stripr
 
+<img width="2988" height="1692" alt="image" src="https://github.com/user-attachments/assets/12ff8c33-088d-4bf1-b151-a246c4120e6a" />
+
+
 **Yield stripping for tokenized stocks on Solana.** xStocks pay dividends by raising a Token-2022 multiplier on the token; Stripr turns that into a yield you can own and trade. It splits a tokenized share into two tokens:
 
 - **PT (Principal Token):** the claim on the share itself.
