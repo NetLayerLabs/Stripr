@@ -4,10 +4,15 @@ import { cn } from "@/lib/cn";
 
 export type TokenKind = "stock" | "pt" | "yt" | "usd";
 
+/**
+ * PT and YT are mirrored on purpose: one share splits into a principal that sits
+ * at the bottom of the chip and a yield that rises off the top of it. Side by
+ * side the two halves read as one whole, which is what the program actually does.
+ */
 const TOKEN_TONES: Record<TokenKind, string> = {
   stock: "bg-zinc-100 text-zinc-900",
-  pt: "bg-sky-400/15 text-sky-300 ring-1 ring-inset ring-sky-400/30",
-  yt: "bg-emerald-400/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30",
+  pt: "bg-gradient-to-t from-sky-400/30 to-sky-400/[0.04] text-sky-300 ring-1 ring-inset ring-sky-400/30",
+  yt: "bg-gradient-to-b from-emerald-400/30 to-emerald-400/[0.04] text-emerald-300 ring-1 ring-inset ring-emerald-400/30",
   usd: "bg-blue-500/15 text-blue-300 ring-1 ring-inset ring-blue-400/30",
 };
 
