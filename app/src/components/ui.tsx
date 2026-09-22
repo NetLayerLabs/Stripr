@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import { brandGlyph } from "@/components/BrandGlyphs";
+import Image from "next/image";
+
+import { tokenLogo } from "@/components/BrandGlyphs";
 import { cn } from "@/lib/cn";
 
 export type TokenKind = "stock" | "pt" | "yt" | "usd";
@@ -31,8 +33,19 @@ export function TokenIcon({
   symbol: string;
   size?: keyof typeof ICON_SIZES;
 }) {
-  const Brand = kind === "stock" ? brandGlyph(symbol) : null;
+  const logo = kind === "stock" ? tokenLogo(symbol) : null;
   const glyph = kind === "pt" ? "PT" : kind === "yt" ? "YT" : kind === "usd" ? "$" : symbol.slice(0, 1);
+  if (logo) {
+    // The logo is the whole chip: these marks carry their own background colour.
+    return (
+      <Image
+        src={logo}
+        alt=""
+        aria-hidden
+        className={cn("shrink-0 rounded-full object-cover", ICON_SIZES[size])}
+      />
+    );
+  }
   return (
     <span
       aria-hidden
@@ -42,7 +55,7 @@ export function TokenIcon({
         TOKEN_TONES[kind]
       )}
     >
-      {Brand ? <Brand className="h-[55%] w-auto" /> : glyph}
+      {glyph}
     </span>
   );
 }
