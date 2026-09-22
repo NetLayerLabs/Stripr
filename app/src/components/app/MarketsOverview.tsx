@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ChevronRight } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -31,6 +31,9 @@ type Row = {
   ytYieldPercent: number | null;
 };
 
+/** Rows per page. Enough that the table still reads as a market list, not a scroll. */
+const PAGE_SIZE = 8;
+
 const COLUMNS: Array<{ key: SortKey; label: string }> = [
   { key: "market", label: "Market" },
   { key: "stripped", label: "Stock stripped" },
@@ -59,6 +62,7 @@ export function MarketsOverview() {
   const prices = usePrices();
   const offersByMarket = useOffersByMarket(markets.data);
   const [sort, setSort] = useState<{ key: SortKey; direction: Direction }>({ key: "stripped", direction: "desc" });
+  const [page, setPage] = useState(0);
 
   const rows = useMemo<Row[]>(
     () =>
@@ -89,6 +93,11 @@ export function MarketsOverview() {
     });
   }, [rows, sort]);
 
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  // A sort or a network change can leave the reader past the end; show the last page instead of nothing.
+  const current = Math.min(page, pageCount - 1);
+  const visible = sorted.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
+
   if (markets.isPending) return <DashboardSkeleton />;
   if (markets.isError) return <ErrorState onRetry={() => void markets.refetch()} />;
   if (rows.length === 0) return <NoMarkets />;
@@ -100,11 +109,13 @@ export function MarketsOverview() {
   const earningPositions = rows.reduce((sum, row) => sum + row.positions, 0);
 
   function toggleSort(key: SortKey) {
-    setSort((current) =>
-      current.key === key
-        ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
+    setSort((active) =>
+      active.key === key
+        ? { key, direction: active.direction === "asc" ? "desc" : "asc" }
         : { key, direction: key === "market" ? "asc" : "desc" }
     );
+    // Re-sorting is a new ordering, so the reader belongs at its start.
+    setPage(0);
   }
 
   return (
@@ -176,7 +187,7 @@ export function MarketsOverview() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
-              {sorted.map((row) => {
+              {visible.map((row) => {
                 // Carry the network so the link works when shared or refreshed.
                 const href = `/app/markets/${row.address}?network=${cluster}`;
                 const { market } = row;
@@ -238,6 +249,37 @@ export function MarketsOverview() {
             </tbody>
           </table>
         </div>
+
+        {pageCount > 1 ? (
+          <div className="flex items-center justify-between gap-4 border-t border-white/[0.06] px-4 py-3 sm:px-6">
+            <p className="text-xs text-zinc-500">
+              {current * PAGE_SIZE + 1}-{current * PAGE_SIZE + visible.length} of {sorted.length} markets
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setPage(current - 1)}
+                disabled={current === 0}
+                className="inline-flex h-8 items-center gap-1 rounded-lg border border-white/[0.08] px-2.5 text-xs text-zinc-300 transition-colors hover:border-white/15 hover:bg-white/[0.06] disabled:pointer-events-none disabled:opacity-35"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Previous
+              </button>
+              <span className="px-2 font-mono text-xs text-zinc-500">
+                {current + 1}/{pageCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage(current + 1)}
+                disabled={current >= pageCount - 1}
+                className="inline-flex h-8 items-center gap-1 rounded-lg border border-white/[0.08] px-2.5 text-xs text-zinc-300 transition-colors hover:border-white/15 hover:bg-white/[0.06] disabled:pointer-events-none disabled:opacity-35"
+              >
+                Next
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

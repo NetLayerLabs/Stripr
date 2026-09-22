@@ -52,6 +52,46 @@
       "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX": {
         "symbol": "MSFTx",
         "name": "Microsoft xStock"
+      },
+      "XsGVi5eo1Dh2zUpic4qACcjuWGjNv8GCt3dm5XcX6Dn": {
+        "symbol": "JNJx",
+        "name": "Johnson & Johnson xStock"
+      },
+      "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ": {
+        "symbol": "KOx",
+        "name": "Coca-Cola xStock"
+      },
+      "XsYdjDjNUygZ7yGKfQaB6TxLh2gC6RRjzLtLAGJrhzV": {
+        "symbol": "PGx",
+        "name": "Procter & Gamble xStock"
+      },
+      "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2": {
+        "symbol": "MCDx",
+        "name": "McDonald's xStock"
+      },
+      "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN": {
+        "symbol": "GOOGLx",
+        "name": "Alphabet xStock"
+      },
+      "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu": {
+        "symbol": "METAx",
+        "name": "Meta xStock"
+      },
+      "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ": {
+        "symbol": "QQQx",
+        "name": "Nasdaq xStock"
+      },
+      "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg": {
+        "symbol": "AMZNx",
+        "name": "Amazon xStock"
+      },
+      "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu": {
+        "symbol": "COINx",
+        "name": "Coinbase xStock"
+      },
+      "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ": {
+        "symbol": "MSTRx",
+        "name": "MicroStrategy xStock"
       }
     }
   }
