@@ -7,13 +7,17 @@
 
 Holders can keep, sell or hedge each part separately, and a PT + YT pair always redeems for the original stock. A built-in on-chain offer book lets anyone sell future dividends for USDC today, or buy them.
 
+**Live app: [stripr.xyz](https://stripr.xyz)** - deployed on Solana **mainnet** with fifteen real xStocks markets, and on devnet with a faucet so anyone can try the full flow without owning tokenized stock.
+
 Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.com/hackathons/stocklana) (Credit & Yield track).
 
 ## For judges
 
-**Try it in three minutes** (Solana Devnet, no setup):
+Stripr runs on mainnet against the real xStocks, and on devnet with test tokens. Devnet is the faster route: it needs no KYC-gated stock and the faucet funds you in one click.
 
-1. Open the app, pick the **PG** market - it pays both kinds of dividend.
+**Try it in three minutes** (Solana Devnet, no setup, at [stripr.xyz/app](https://stripr.xyz/app)):
+
+1. Open the app. It opens on Mainnet, so switch to **Devnet** in the header, then pick the **PG** market - it pays both kinds of dividend.
 2. Connect any wallet on Devnet and press **Get test PG + USDC**. You receive 100 PG, 1,000 demo USDC, and a little SOL for fees.
 3. **Strip** 10 PG with "Lock YT to earn" on. One transaction mints 10 PT-PG and 10 YT-PG and locks the YT.
 4. In **Trade PT and YT**, press **Sell**, list 5 YT-PG at any price, and watch it appear in the book as a % of the live PG share price.
@@ -24,17 +28,22 @@ Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.c
 
 | What | Where |
 |---|---|
+| Program (Mainnet) | [`9wpHm…nzZF`](https://explorer.solana.com/address/9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF) |
 | Program (Devnet) | [`9wpHm…nzZF`](https://explorer.solana.com/address/9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF?cluster=devnet) |
+| A real AAPLx stripped on mainnet | [`2iZTHs…iNTjC`](https://explorer.solana.com/address/2iZTHsJWMP78s5QARZrNNzFVLiSHMGAjyj8SzM6iNTjC) |
+| A live YT offer escrowed on mainnet | [`2jK3uX…EfK8z`](https://explorer.solana.com/address/2jK3uXdDSFvvUtcWkhJvUtT6voiyj3ouEVcXvxgEfK8z) |
 | A reinvested dividend reaching locked YT | [`5noUGW…Touve`](https://explorer.solana.com/tx/5noUGWJLGg6vEw8ynKaGcF68cW8kx8AnNitAR3sXYLUqTWpmhx7rXXjcJFyvxbtgnmFNa91RxsCf1WzJHjTTouve?cluster=devnet) |
 | A YT sale filled from the order book | [`3E4yeZ…nYhiy`](https://explorer.solana.com/tx/3E4yeZqguWHTPgV8Ctq2bwtBozUcFcofRJetCrZZhzj6Dg7siQDTaSadvKumdcXJpTHyMJwnLysuB94psPXnYhiy?cluster=devnet) |
 | Live mainnet dividend ledger | The "What each xStock last paid" table on the landing page, read from each mint's Scaled UI Amount config |
 
 **What is real, and what is a demo**
 
+On **mainnet** everything below is real: the markets hold Backed's own xStocks and quote in circulating USDC. The table describes the **devnet** demo, which exists so the flow can be tried without KYC-gated stock.
+
 | | Real | Demo |
 |---|---|---|
 | Dividend mechanism | Read from the Token-2022 Scaled UI Amount multiplier, the way xStocks actually pay | - |
-| Mainnet data | Every xStock's multiplier, dividend and price shown live on the landing page | - |
+| Mainnet | Fifteen markets against the real xStocks, quoting circulating USDC, with every multiplier, dividend and price read live | - |
 | Stocks in the markets | - | Team-minted Token-2022 tokens named after the companies, so anyone can strip without owning xStocks |
 | USDC | - | A demo mint, so the faucet can hand out spending money |
 | Cash dividends (KO, PG markets) | The program instruction is real | Real xStocks only reinvest; a cash payer must deposit the USDC |
@@ -67,6 +76,20 @@ Stocks are coming on-chain as SPL tokens (for example xStocks), but a share's in
 - **Share units.** PT and YT are minted in share units (`raw × multiplier`). Redemption and reinvested yield together never exceed the deposit.
 - **Monotonic multiplier.** The multiplier never moves down. When nothing is locked, released yield waits as *pending* for the next locker.
 - **Permissionless sync.** Anyone can call `sync_multiplier`, and every state-changing instruction syncs first.
+
+## Live on Mainnet
+
+| | Address |
+|---|---|
+| Program | [`9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF`](https://explorer.solana.com/address/9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF) |
+| Upgrade authority | `3EGKfA8W2ocah3Gusox5JRfoN5WVAgXw9hubgyBGXvSy` |
+| Quote token | Circulating USDC `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+
+Fifteen markets, one per xStock, each holding the issuer's own Token-2022 mint:
+
+[AAPLx](https://explorer.solana.com/address/2iZTHsJWMP78s5QARZrNNzFVLiSHMGAjyj8SzM6iNTjC) · [AMZNx](https://explorer.solana.com/address/99qu6rB3MxLZKpYKv1H3XsGL93s9YodPgecroXpFt4em) · [COINx](https://explorer.solana.com/address/7cq1bVESWKkcsqUKnqxygE7ZEAYS8oyMFpx8FKHCCEZS) · [GOOGLx](https://explorer.solana.com/address/GcvUEbszaNmH5656nS8ZaCD4anPK2YoZCYZrrZKTaqQV) · [JNJx](https://explorer.solana.com/address/CxUKQ1zGSVaJiwLGtb2V29E4GaDMF5yZ86E5B33oA56a) · [KOx](https://explorer.solana.com/address/9jBcvD9aze6EaFZRsaYTd3UFzoTHgtRsh4EuyFAaobeB) · [MCDx](https://explorer.solana.com/address/36a69s32YS3EPmSWWzPg9ZvidUimELUFGr3DXN7qgkPB) · [METAx](https://explorer.solana.com/address/CeFhFzH2sTuyL9YATdpHKMdoQz16rzaS3GeRzjH9AQwz) · [MSFTx](https://explorer.solana.com/address/9fqqyq1C84x2xgaLQf166WAgjPfhx2ZHgnwgSgiLXKw7) · [MSTRx](https://explorer.solana.com/address/2R3831uxCs9wUE98S7nEwA7Ly7MXzzM8VRD5b337pLZj) · [NVDAx](https://explorer.solana.com/address/Bv1hnygxeURXW4KGFJrBY1PuAqzpmkTmWWnDDGqQovnt) · [PGx](https://explorer.solana.com/address/7LnhwQ2RKHxAVWpZT7wR3815iFTEcaWs53V41NX4nX37) · [QQQx](https://explorer.solana.com/address/7kyGZitMYDeDF8ty36GofLTpB9C2eC89AgYFLCzUCB5c) · [SPYx](https://explorer.solana.com/address/7hUi98wVdrakk7AKHSxYCXmRZR1HQSejbiNHYZu5k27w) · [TSLAx](https://explorer.solana.com/address/G1LUzJuUknoE4AZsFCYs1YSjP8vuLvgkSbb4rZKGJUjW)
+
+Dividend rates are read from each mint's Scaled UI Amount config and annualised since the token launched: KOx 1.75%/yr, PGx 1.68%, MCDx 1.65%, JNJx 1.52%, MSFTx 0.46%, AAPLx 0.25%. Those figures are computed live by `/api/dividends`, not stored.
 
 ## Live on Devnet
 
@@ -127,15 +150,15 @@ programs/stripr/   Anchor program (state, instructions, multiplier sync, unit te
 tests/             End-to-end tests (classic mints, real AAPLx fixture, xStock-like Token-2022 mint)
 scripts/           Devnet demo setup, market seeding and a live reinvested-dividend trigger
 app/               Next.js frontend and API routes (market history, RPC proxy, faucet, prices)
-docs/              Mainnet xStocks research notes
+docs/              Mainnet xStocks research, deployment runbook and submission notes
 ```
 
 ## Getting started
 
 ### Prerequisites
 
-- Rust 1.89+
-- Solana / Agave CLI 3.1.10
+- Rust 1.98+
+- Solana / Agave CLI 4.1.2 (Agave client)
 - Anchor 1.2.0 (via `avm`)
 - Node.js 20+
 
