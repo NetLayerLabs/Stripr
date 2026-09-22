@@ -30,10 +30,11 @@ const COOLDOWN_MS = 10 * 60 * 1000;
 const lastRequest = new Map<string, number>();
 const lastRequestByIp = new Map<string, number>();
 
-/** The faucet signs with the demo stock's mint authority and only ever talks to devnet. */
+/**
+ * The faucet signs with the demo stock's mint authority and only ever talks to devnet,
+ * so it stays available while the app itself defaults to mainnet.
+ */
 function faucetKeypair(): Keypair | null {
-  // A mainnet deployment has no business running a faucet, even a devnet one.
-  if (process.env.NEXT_PUBLIC_SOLANA_CLUSTER === "mainnet-beta") return null;
   const secret = process.env.FAUCET_SECRET_KEY;
   if (!secret) return null;
   try {
