@@ -4,8 +4,8 @@
 
 **Links**
 - GitHub: https://github.com/NetLayerLabs/Stripr
-- Live demo: _add the hosted app URL_
-- Video: _add the demo video URL_
+- Live demo: https://stripr.xyz (opens on mainnet; switch to Devnet in the header for the faucet)
+- Video: _add the uploaded demo video URL_
 
 **For judges:** the README's [For judges](https://github.com/NetLayerLabs/Stripr#for-judges) section has a three-minute click path, explorer links to a real reinvested dividend and a real YT sale, and a table of what is real versus demo.
 
@@ -52,6 +52,10 @@ We say this plainly: with no maturity date and a fixed-price book, PT and YT don
 - **Tests:**
   - 8 accounting unit tests.
   - 19 end-to-end tests, including a market on the real mainnet AAPLx mint and an xStock-style Token-2022 mint.
+- **Live on Solana mainnet:**
+  - Program [`9wpHm…nzZF`](https://explorer.solana.com/address/9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF), byte-identical to the build in this repo.
+  - Fifteen markets against Backed's own xStocks mints (AAPLx, MSFTx, NVDAx, GOOGLx, METAx, AMZNx, TSLAx, SPYx, QQQx, KOx, PGx, JNJx, MCDx, COINx, MSTRx), quoted in circulating USDC.
+  - A real AAPLx position stripped and locked, and a YT listing held in the program's escrow.
 - **Live on Devnet:**
   - Five demo markets (AAPL, MSFT, JNJ, KO, PG) with several dividend rounds of history.
   - Listings and sales in the offer book.
@@ -68,7 +72,7 @@ We say this plainly: with no maturity date and a fixed-price book, PT and YT don
 
 ## What's next
 
-- **Mainnet:** deploy with real xStocks markets (AAPLx, SPYx, NVDAx, TSLAx, MSFTx).
+- **Liquidity on mainnet:** seed the dividend payers (KOx, PGx, JNJx, MCDx) where YT carries real yield.
 - **Multiplier keeper:** a permissionless bot that syncs multipliers when issuers update them.
 - **Pricing and audit:** maturity-dated PT and YT, a PT/YT AMM with an implied dividend yield, and a security audit.
 
