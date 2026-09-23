@@ -71,6 +71,9 @@ async function record(page) {
   return {
     async stop() {
       await client.send('Page.stopScreencast').catch(() => {})
+      // A still page sends no frames, so a closing hold would vanish; pin the last
+      // picture to the moment filming actually stopped.
+      if (frames.length) frames.push({ data: frames[frames.length - 1].data, t: Date.now() / 1000 })
       return frames
     },
   }
@@ -188,124 +191,122 @@ const app = (p) => `${BASE}${p}`
 export { }
 
 // ---- beats --------------------------------------------------------------------
+//
+// Each beat gets { page, begin, mark }. It sets the page up off camera, calls begin()
+// when the picture is worth filming, then mark()s the elements the narration names.
+// A mark records where that element sits on the 1600x900 page and when, so the film's
+// camera can be aimed at it exactly instead of by eye.
+
+const MAINNET_APP = app('/app?network=mainnet-beta')
+const DEVNET_APP = app('/app?network=devnet')
+const DEVNET_MARKET = app(`/app/markets/${MARKET}?network=devnet`)
+
+async function settleMainnet(page) {
+  await goto(page, MAINNET_APP, 11000)
+  const ack = page.getByRole('button', { name: /I understand/i }).first()
+  if (await ack.count()) { await ack.click().catch(() => {}); await wait(page, 1200) }
+  const x = page.locator('[aria-label="Dismiss the mainnet notice"]').first()
+  if (await x.count()) { await x.click().catch(() => {}); await wait(page, 800) }
+}
+
+async function onMarketConnected(page) {
+  await goto(page, DEVNET_APP, 8000)
+  await connectWallet(page)
+  await goto(page, DEVNET_MARKET, 11000)
+  await dismissDialog(page)
+}
 
 const BEATS = {
-  /** v00 + v01: the wordmark, the promise, the split. */
-  async landing(page) {
-    await goto(page, app('/?network=mainnet-beta'), 9000)
-    await wait(page, 2600)
-    await smoothScroll(page, 620, 2200)
-    await wait(page, 2000)
-    await smoothScroll(page, 1180, 1800)
-    await wait(page, 2400)
-  },
-
-  /** v02: the multiplier is the dividend - the live mainnet ledger. */
-  async ledger(page) {
-    await goto(page, app('/?network=mainnet-beta'), 11000)
-    await scrollToText(page, 'What each xStock last paid', -120, 1800)
-    await wait(page, 5200)
-    await smoothScroll(page, (await page.evaluate(() => window.scrollY)) + 380, 1600)
-    await wait(page, 4200)
-  },
-
-  /** v03: PT and YT, and what each one is. */
-  async anatomy(page) {
-    await goto(page, app('/?network=mainnet-beta'), 9000)
-    await scrollToText(page, 'One stock in', -120, 1700)
+  /** 04: fifteen mainnet markets, and the pager. */
+  async markets({ page, begin, mark }) {
+    await settleMainnet(page)
+    await begin()
+    await wait(page, 900)
+    await mark('table', page.locator('table').first())
     await wait(page, 3200)
-    await smoothScroll(page, (await page.evaluate(() => window.scrollY)) + 460, 1600)
-    await wait(page, 3600)
-  },
-
-  /** v04: fifteen live mainnet markets, and the pager. */
-  async markets(page) {
-    await goto(page, app('/app?network=mainnet-beta'), 12000)
-    const ack = page.getByRole('button', { name: /I understand/i }).first()
-    if (await ack.count()) await softClick(page, ack, 1500)
-    await wait(page, 3800)
-    await smoothScroll(page, 420, 1500)
-    await wait(page, 2600)
+    await smoothScroll(page, 250, 1500)
+    await wait(page, 1600)
+    await mark('tableLow', page.locator('table').first())
     const next = page.getByRole('button', { name: /^Next$/ }).first()
-    if (await next.count()) { await softClick(page, next, 2600) }
-    await wait(page, 2200)
-  },
-
-  /** v05: deposit a stock, receive PT and YT, lock the YT - a real devnet transaction. */
-  async strip(page) {
-    await goto(page, app('/app?network=devnet'), 9000)
-    await connectWallet(page)
-    await goto(page, app(`/app/markets/${MARKET}?network=devnet`), 12000)
-    const faucet = page.locator('button', { hasText: /Get test/ }).first()
-    if (await faucet.count()) { await softClick(page, faucet, 1200); await wait(page, 26000); await dismissDialog(page) }
-    const input = page.locator('input[inputmode="decimal"]').first()
-    await typeInto(page, input, '5')
-    const go = page.locator('button.btn-primary', { hasText: /Strip/ }).first()
-    if (await go.count()) { await softClick(page, go, 1200); await wait(page, 24000) }
-    await wait(page, 2200)
-    await page.evaluate(() => window.__hideCursor?.())
-    await wait(page, 2600)
-  },
-
-  /** v06: what the position holds, and the reinvested dividend that reached it. */
-  async position(page) {
-    await goto(page, app('/app?network=devnet'), 8000)
-    await connectWallet(page)
-    await goto(page, app(`/app/markets/${MARKET}?network=devnet`), 12000)
-    await dismissDialog(page)
-    await scrollToText(page, 'Your position', -140, 1500)
-    await wait(page, 5200)
-    await smoothScroll(page, (await page.evaluate(() => window.scrollY)) - 300, 1400)
-    await wait(page, 3400)
-  },
-
-  /** v07 + v08: the order book, its yields, and listing YT for sale. */
-  async book(page) {
-    // Connect on the market page itself: routing through /app first spent most of the
-    // clip on navigation, leaving too little of the order book to cut from.
-    await goto(page, app(`/app/markets/${MARKET}?network=devnet`), 11000)
-    await connectWallet(page)
+    if (await next.count()) { await softClick(page, next, 1500) }
+    await mark('page2', page.locator('table').first())
     await wait(page, 3000)
-    await scrollToText(page, 'Trade PT and YT', -120, 1700)
-    await wait(page, 4200)
+  },
+
+  /** 05: stock in, PT and YT out, YT locked - one real devnet transaction. */
+  async strip({ page, begin, mark }) {
+    await onMarketConnected(page)
+    await smoothScroll(page, 150, 10)
+    await begin()
+    await wait(page, 700)
+    const input = page.locator('input[inputmode="decimal"]').first()
+    await mark('form', 'Strip a stock', { minW: 700, minH: 400 })
+    await typeInto(page, input, '5')
+    await wait(page, 900)
+    await mark('outputs', 'PT-AAPL', { minW: 700, minH: 90 })
+    const go = page.locator('button.btn-primary', { hasText: /Strip/ }).first()
+    await mark('submit', go)
+    await softClick(page, go, 600)
+    await page.evaluate(() => window.__hideCursor?.())
+    await page.locator('[role="dialog"]').first().waitFor({ timeout: 15000 }).catch(() => {})
+    await wait(page, 400)
+    await mark('dialog', page.locator('[role="dialog"]').first())
+    await page.getByText(/View on Solana Explorer/i).first().waitFor({ timeout: 40000 }).catch(() => {})
+    await wait(page, 300)
+    await mark('confirmed', page.locator('[role="dialog"]').first())
+    await wait(page, 3500)
+  },
+
+  /** 06: the position - YT locked and earning. */
+  async position({ page, begin, mark }) {
+    await onMarketConnected(page)
+    await smoothScroll(page, 150, 10)
+    await begin()
+    await wait(page, 800)
+    await mark('stats', 'Stock in vault', { minW: 1200, minH: 90 })
+    await mark('rail', 'Claimable yield', { minW: 250, minH: 400 })
+    await wait(page, 7000)
+  },
+
+  /** 07: the order book - a buyer takes the best listing at the price it shows. */
+  async book({ page, begin, mark }) {
+    await onMarketConnected(page)
+    await scrollToText(page, 'Trade PT and YT', -110, 10)
+    await wait(page, 1500)
+    await begin()
+    await wait(page, 800)
+    await mark('book', 'cheapest first', { minW: 800, minH: 200 })
+    await mark('ticket', 'You buy', { minW: 300, minH: 380 })
     const rows = page.locator('button', { hasText: /^Buy$/ })
-    if (await rows.count()) await moveTo(page, rows.first())
-    await wait(page, 3600)
-    const sell = page.getByRole('button', { name: /^Sell$/ }).first()
-    if (await sell.count()) await softClick(page, sell, 1600)
-    const amount = page.locator('input[inputmode="decimal"]').last()
-    await typeInto(page, amount, '2')
-    await wait(page, 3200)
+    if (await rows.count()) { await moveTo(page, rows.first()); await wait(page, 900); await moveTo(page, rows.nth(1)); }
+    await wait(page, 1400)
+    // The page carries several amount fields (strip, admin payout, trade ticket); the
+    // ticket's is the one on screen in the right-hand column. Index order is not stable.
+    const idx = await page.evaluate(() =>
+      [...document.querySelectorAll('input[inputmode="decimal"]')].findIndex((el) => {
+        const r = el.getBoundingClientRect()
+        return r.x > 1080 && r.y > 380 && r.y < 560
+      }),
+    )
+    if (idx < 0) throw new Error('trade ticket amount field not on screen')
+    await typeInto(page, page.locator('input[inputmode="decimal"]').nth(idx), '2')
+    await wait(page, 600)
+    await wait(page, 3500)
   },
 
-  /** v09: analytics decoded from the market's own events. */
-  async analytics(page) {
-    await goto(page, app(`/app/markets/${MARKET}?network=devnet`), 13000)
-    await scrollToText(page, 'Market analytics', -120, 1800)
-    await wait(page, 5000)
-    await smoothScroll(page, (await page.evaluate(() => window.scrollY)) + 520, 1700)
-    await wait(page, 4600)
-  },
-
-  /** v10: one Anchor program, and what makes the accounting safe. */
-  async architecture(page) {
-    // This section carries the longest line, so it needs footage to spare after the
-    // scroll into place is trimmed off the front.
-    await goto(page, app('/?network=mainnet-beta'), 9000)
-    await scrollToText(page, 'A single Anchor program', -120, 1800)
-    await wait(page, 7000)
-    await smoothScroll(page, (await page.evaluate(() => window.scrollY)) + 420, 1800)
-    await wait(page, 6500)
-    await smoothScroll(page, (await page.evaluate(() => window.scrollY)) + 460, 1800)
-    await wait(page, 7000)
-  },
-
-  /** v11: close on the mark. */
-  async outro(page) {
-    await goto(page, app('/?network=mainnet-beta'), 9000)
-    await wait(page, 3200)
-    await smoothScroll(page, 260, 1400)
-    await wait(page, 2600)
+  /** 09: analytics decoded from the market's own events. */
+  async analytics({ page, begin, mark }) {
+    await goto(page, DEVNET_MARKET, 13000)
+    await scrollToText(page, 'Market analytics', -90, 10)
+    await wait(page, 2500)
+    await begin()
+    await wait(page, 700)
+    await mark('supply', 'Supply over time', { minW: 600, minH: 250 })
+    await wait(page, 3500)
+    await smoothScroll(page, (await page.evaluate(() => window.scrollY)) + 520, 1800)
+    await wait(page, 900)
+    await mark('reinvested', 'Reinvested dividends', { minW: 400, minH: 250, nth: -1 })
+    await wait(page, 4200)
   },
 }
 
@@ -321,19 +322,43 @@ const browser = await chromium.launch({
   args: [`--force-device-scale-factor=${DPR}`, '--hide-scrollbars', '--lang=en-US', '--mute-audio'],
 })
 
-const manifest = fs.existsSync(path.join(ROOT, 'src/clips.json'))
+const manifest = fs.existsSync(path.join(ROOT, 'src/clips.json')) && process.env.BEAT
   ? JSON.parse(fs.readFileSync(path.join(ROOT, 'src/clips.json'), 'utf8'))
   : {}
 
 for (const beat of todo) {
   console.log(`\n== ${beat}`)
   const { ctx, page } = await newSession(browser)
+  const marks = []
+  let rec = null
+  let t0 = 0
+  const begin = async () => { rec = await record(page); t0 = Date.now() / 1000 }
+  const mark = async (name, target, opts = {}) => {
+    const box = typeof target === 'string'
+      ? await page.evaluate(([text, minW, minH, nth]) => {
+          const hits = [...document.querySelectorAll('body *')].filter(
+            (e) => e.children.length === 0 && (e.textContent || '').trim().toLowerCase().startsWith(text.toLowerCase()) && e.getBoundingClientRect().width > 0,
+          )
+          let el = hits[nth < 0 ? hits.length + nth : nth]
+          if (!el) return null
+          while (el.parentElement) {
+            const r = el.getBoundingClientRect()
+            if (r.width >= minW && r.height >= minH) return { x: r.x, y: r.y, width: r.width, height: r.height }
+            el = el.parentElement
+          }
+          return null
+        }, [target, opts.minW ?? 300, opts.minH ?? 120, opts.nth ?? 0])
+      : await target.boundingBox({ timeout: 1500 }).catch(() => null)
+    if (!box) { console.log(`   (mark ${name}: not found)`); return }
+    const m = { name, t: +(Date.now() / 1000 - t0).toFixed(2), rect: [box.x, box.y, box.width, box.height].map((v) => Math.round(v)) }
+    marks.push(m)
+    console.log(`   mark ${name} @${m.t}s  [${m.rect.join(', ')}]`)
+  }
   try {
-    // Warm the route first so the clip never opens on a spinner.
-    const rec = await record(page)
-    await BEATS[beat](page)
+    await BEATS[beat]({ page, begin, mark })
+    if (!rec) throw new Error('beat never called begin()')
     const frames = await rec.stop()
-    manifest[beat] = encode(beat, frames)
+    manifest[beat] = { ...encode(beat, frames), marks }
   } catch (e) {
     console.log(`   FAILED: ${e.message.slice(0, 160)}`)
     await page.screenshot({ path: path.join(TMP, `fail-${beat}.png`) }).catch(() => {})

@@ -19,7 +19,9 @@
   },
   "devDependencies": {
     "@solana/web3.js": "^1.95.0",
+    "@types/react": "^18.3.31",
     "bs58": "^6.0.0",
-    "playwright": "1.58"
+    "playwright": "1.58",
+    "typescript": "^5.9.3"
   }
 }

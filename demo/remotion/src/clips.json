@@ -1,62 +1,202 @@
 {
- "landing": {
-  "file": "clips/landing.mp4",
-  "duration": 21.566667,
-  "width": 3200,
-  "height": 1800
- },
- "ledger": {
-  "file": "clips/ledger.mp4",
-  "duration": 21.066667,
-  "width": 3200,
-  "height": 1800
- },
- "anatomy": {
-  "file": "clips/anatomy.mp4",
-  "duration": 16.7,
-  "width": 3200,
-  "height": 1800
- },
  "markets": {
   "file": "clips/markets.mp4",
-  "duration": 23.766667,
+  "duration": 12.466667,
   "width": 3200,
-  "height": 1800
- },
- "position": {
-  "file": "clips/position.mp4",
-  "duration": 31.8,
-  "width": 3200,
-  "height": 1800
- },
- "book": {
-  "file": "clips/book.mp4",
-  "duration": 34.8,
-  "width": 3200,
-  "height": 1800
- },
- "analytics": {
-  "file": "clips/analytics.mp4",
-  "duration": 22.433333,
-  "width": 3200,
-  "height": 1800
- },
- "architecture": {
-  "file": "clips/architecture.mp4",
-  "duration": 29.433333,
-  "width": 3200,
-  "height": 1800
- },
- "outro": {
-  "file": "clips/outro.mp4",
-  "duration": 24.1,
-  "width": 3200,
-  "height": 1800
+  "height": 1800,
+  "marks": [
+   {
+    "name": "table",
+    "t": 0.91,
+    "rect": [
+     137,
+     377,
+     1326,
+     598
+    ]
+   },
+   {
+    "name": "tableLow",
+    "t": 7.24,
+    "rect": [
+     137,
+     127,
+     1326,
+     598
+    ]
+   },
+   {
+    "name": "page2",
+    "t": 9.5,
+    "rect": [
+     137,
+     127,
+     1326,
+     529
+    ]
+   }
+  ]
  },
  "strip": {
   "file": "clips/strip.mp4",
-  "duration": 87.3,
+  "duration": 9.133333,
   "width": 3200,
-  "height": 1800
+  "height": 1800,
+  "marks": [
+   {
+    "name": "form",
+    "t": 0.71,
+    "rect": [
+     136,
+     220,
+     924,
+     532
+    ]
+   },
+   {
+    "name": "outputs",
+    "t": 3.39,
+    "rect": [
+     136,
+     220,
+     1328,
+     1036
+    ]
+   },
+   {
+    "name": "submit",
+    "t": 3.4,
+    "rect": [
+     161,
+     711,
+     874,
+     48
+    ]
+   },
+   {
+    "name": "dialog",
+    "t": 5.18,
+    "rect": [
+     576,
+     231,
+     448,
+     438
+    ]
+   },
+   {
+    "name": "confirmed",
+    "t": 5.67,
+    "rect": [
+     576,
+     218,
+     448,
+     465
+    ]
+   }
+  ]
+ },
+ "position": {
+  "file": "clips/position.mp4",
+  "duration": 7.8,
+  "width": 3200,
+  "height": 1800,
+  "marks": [
+   {
+    "name": "stats",
+    "t": 0.81,
+    "rect": [
+     136,
+     78,
+     1328,
+     119
+    ]
+   },
+   {
+    "name": "rail",
+    "t": 0.81,
+    "rect": [
+     1084,
+     220,
+     380,
+     654
+    ]
+   }
+  ]
+ },
+ "book": {
+  "file": "clips/book.mp4",
+  "duration": 9.566667,
+  "width": 3200,
+  "height": 1800,
+  "marks": [
+   {
+    "name": "ticket",
+    "t": 0.81,
+    "rect": [
+     1109,
+     422,
+     330,
+     498
+    ]
+   },
+   {
+    "name": "book",
+    "t": 0.8,
+    "rect": [
+     137,
+     335,
+     923,
+     271
+    ]
+   },
+   {
+    "name": "stats",
+    "t": 0.8,
+    "rect": [
+     137,
+     200,
+     1326,
+     118
+    ]
+   },
+   {
+    "name": "quote",
+    "t": 6.0,
+    "rect": [
+     1109,
+     422,
+     330,
+     322
+    ]
+   }
+  ]
+ },
+ "analytics": {
+  "file": "clips/analytics.mp4",
+  "duration": 11.1,
+  "width": 3200,
+  "height": 1800,
+  "marks": [
+   {
+    "name": "supply",
+    "t": 0.71,
+    "rect": [
+     136,
+     168,
+     1328,
+     406
+    ]
+   },
+   {
+    "name": "reinvested",
+    "t": 6.93,
+    "rect": [
+     136,
+     78,
+     652,
+     374
+    ]
+   }
+  ]
  }
 }
