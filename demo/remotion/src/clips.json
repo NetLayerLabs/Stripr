@@ -1,0 +1,62 @@
+{
+ "landing": {
+  "file": "clips/landing.mp4",
+  "duration": 21.566667,
+  "width": 3200,
+  "height": 1800
+ },
+ "ledger": {
+  "file": "clips/ledger.mp4",
+  "duration": 21.066667,
+  "width": 3200,
+  "height": 1800
+ },
+ "anatomy": {
+  "file": "clips/anatomy.mp4",
+  "duration": 16.7,
+  "width": 3200,
+  "height": 1800
+ },
+ "markets": {
+  "file": "clips/markets.mp4",
+  "duration": 23.766667,
+  "width": 3200,
+  "height": 1800
+ },
+ "position": {
+  "file": "clips/position.mp4",
+  "duration": 31.8,
+  "width": 3200,
+  "height": 1800
+ },
+ "book": {
+  "file": "clips/book.mp4",
+  "duration": 34.8,
+  "width": 3200,
+  "height": 1800
+ },
+ "analytics": {
+  "file": "clips/analytics.mp4",
+  "duration": 22.433333,
+  "width": 3200,
+  "height": 1800
+ },
+ "architecture": {
+  "file": "clips/architecture.mp4",
+  "duration": 29.433333,
+  "width": 3200,
+  "height": 1800
+ },
+ "outro": {
+  "file": "clips/outro.mp4",
+  "duration": 24.1,
+  "width": 3200,
+  "height": 1800
+ },
+ "strip": {
+  "file": "clips/strip.mp4",
+  "duration": 87.3,
+  "width": 3200,
+  "height": 1800
+ }
+}
