@@ -5,7 +5,7 @@
 **Links**
 - GitHub: https://github.com/NetLayerLabs/Stripr
 - Live demo: https://stripr.xyz (opens on mainnet; switch to Devnet in the header for the faucet)
-- Video: _add the uploaded demo video URL_
+- Video: https://youtu.be/ZmsOdKGkx64
 
 **For judges:** the README's [For judges](https://github.com/NetLayerLabs/Stripr#for-judges) section has a three-minute click path, explorer links to a real reinvested dividend and a real YT sale, and a table of what is real versus demo.
 
