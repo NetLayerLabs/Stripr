@@ -42,12 +42,22 @@ export type StockPrice = {
   /** US market hours for the stock, from Pyth feed metadata; null when unknown. */
   marketOpen: boolean | null;
   nextOpen: number | null;
+  /**
+   * What the xStock itself trades at on-chain, per share, when `price` is Pyth's price
+   * for the underlying stock. Null when there is no second opinion to compare.
+   */
+  tokenPrice: number | null;
+  /** tokenPrice / price - 1: how far the token trades above (+) or below (-) the stock. */
+  premium: number | null;
 };
 
 export type PricesResponse = {
   enabled: boolean;
   prices: Record<string, StockPrice>;
+  /** "pyth" when at least one stock is priced by Pyth; the rest still come from Jupiter. */
   source?: PriceSource;
+  /** Underlying stocks Pyth priced, e.g. ["QQQ", "TSLA"]. */
+  pyth?: string[];
   /** Why prices are off, when they are. */
   reason?: string;
 };
@@ -91,57 +101,58 @@ async function marketHours() {
   return hours;
 }
 
-type PythOutcome = { prices: Record<string, StockPrice> } | { reason: string };
-
-async function fromPyth(key: string): Promise<PythOutcome> {
+/**
+ * Pyth's price for each underlying stock the key is entitled to. Every feed is asked for
+ * on its own: Hermes refuses a whole batch if any one feed in it is outside the key's
+ * plan, and a key usually covers only some equities. A refused feed is simply absent.
+ */
+async function fromPyth(key: string): Promise<Record<string, StockPrice>> {
   const hours = await marketHours();
-  // Prefer the 24/7 feed when the US market is closed, so prices show at any hour.
-  const wanted = Object.entries(FEEDS).map(([symbol, feed]) => {
-    const marketIsOpen = hours.get(feed.market)?.open ?? false;
-    const id = !marketIsOpen && feed.roundTheClock ? feed.roundTheClock : feed.market;
-    return { symbol, id, roundTheClock: id !== feed.market, marketFeed: feed.market };
-  });
-  const query = wanted.map((feed) => `ids%5B%5D=${feed.id}`).join("&");
-  const response = await fetch(`${HERMES}/v2/updates/price/latest?${query}&parsed=true`, {
-    headers: { Authorization: `Bearer ${key}` },
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    return {
-      reason:
-        response.status === 403
-          ? "This Pyth key has no entitlement for US equity feeds."
-          : response.status === 401
-            ? "Pyth rejected the API key."
-            : `Pyth responded ${response.status}.`,
+  const fetchFeed = async (id: string) => {
+    const response = await fetch(`${HERMES}/v2/updates/price/latest?ids%5B%5D=${id}&parsed=true`, {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const body = (await response.json()) as {
+      parsed?: Array<{ price: { price: string; conf: string; expo: number; publish_time: number } }>;
     };
-  }
-  const body = (await response.json()) as {
-    parsed?: Array<{ id: string; price: { price: string; conf: string; expo: number; publish_time: number } }>;
+    return body.parsed?.[0]?.price ?? null;
   };
-  const prices: Record<string, StockPrice> = {};
-  for (const entry of body.parsed ?? []) {
-    const feed = wanted.find((candidate) => candidate.id.toLowerCase() === entry.id.toLowerCase());
-    if (!feed) continue;
-    const scale = 10 ** entry.price.expo;
-    const marketHour = hours.get(feed.marketFeed);
-    prices[feed.symbol] = {
-      symbol: feed.symbol,
-      price: Number(entry.price.price) * scale,
-      confidence: Number(entry.price.conf) * scale,
-      publishTime: entry.price.publish_time,
-      source: "pyth",
-      // Pyth carries no multiplier; the dividend rate comes from the token itself.
-      annualizedRate: null,
-      roundTheClock: feed.roundTheClock,
-      marketOpen: marketHour ? marketHour.open : null,
-      nextOpen: marketHour?.nextOpen ?? null,
-    };
-  }
-  return { prices };
+
+  const entries = await Promise.all(
+    Object.entries(FEEDS).map(async ([symbol, feed]) => {
+      const marketHour = hours.get(feed.market);
+      const open = marketHour?.open ?? false;
+      // Out of US hours the 24/7 feed is the live one; the US feed holds the last close.
+      const order = !open && feed.roundTheClock ? [feed.roundTheClock, feed.market] : [feed.market];
+      for (const id of order) {
+        const price = await fetchFeed(id).catch(() => null);
+        if (!price) continue;
+        const scale = 10 ** price.expo;
+        const quote: StockPrice = {
+          symbol,
+          price: Number(price.price) * scale,
+          confidence: Number(price.conf) * scale,
+          publishTime: price.publish_time,
+          source: "pyth",
+          annualizedRate: null,
+          roundTheClock: id !== feed.market,
+          marketOpen: marketHour ? marketHour.open : null,
+          nextOpen: marketHour?.nextOpen ?? null,
+          tokenPrice: null,
+          premium: null,
+        };
+        return [symbol, quote] as const;
+      }
+      return null;
+    }),
+  );
+  return Object.fromEntries(entries.filter((e): e is readonly [string, StockPrice] => e !== null));
 }
 
 type JupiterEntry = {
+  /** What the token itself trades at, per displayed token (the multiplier is already in it). */
   usdPrice?: number;
   stockData?: { price?: number; updatedAt?: string };
   createdAt?: string;
@@ -188,6 +199,8 @@ async function fromJupiter(): Promise<Record<string, StockPrice>> {
       roundTheClock: false,
       marketOpen: null,
       nextOpen: null,
+      tokenPrice: entry.usdPrice && entry.usdPrice > 0 ? entry.usdPrice : null,
+      premium: null,
     };
   }
   return prices;
@@ -197,41 +210,48 @@ export async function GET() {
   if (cache && Date.now() - cache.at < CACHE_MS) return NextResponse.json(cache.body);
 
   const reasons: string[] = [];
-  const key = apiKey();
-  if (key) {
-    try {
-      const outcome = await fromPyth(key);
-      if ("prices" in outcome && Object.keys(outcome.prices).length > 0) {
-        // Pyth has no multiplier, so the dividend rate still comes from the token itself.
-        const rates = await fromJupiter().catch(() => ({}) as Record<string, StockPrice>);
-        const prices = Object.fromEntries(
-          Object.entries(outcome.prices).map(([symbol, price]) => [
-            symbol,
-            { ...price, annualizedRate: rates[symbol]?.annualizedRate ?? null },
-          ])
-        );
-        const body: PricesResponse = { enabled: true, prices, source: "pyth" };
-        cache = { at: Date.now(), body };
-        return NextResponse.json(body);
-      }
-      reasons.push("reason" in outcome ? outcome.reason : "Pyth returned no prices.");
-    } catch {
-      reasons.push("Pyth is unreachable right now.");
-    }
-  } else {
-    reasons.push("No PYTH_API_KEY configured.");
-  }
-
+  let jupiter: Record<string, StockPrice> = {};
   try {
-    const prices = await fromJupiter();
-    if (Object.keys(prices).length > 0) {
-      const body: PricesResponse = { enabled: true, prices, source: "jupiter" };
-      cache = { at: Date.now(), body };
-      return NextResponse.json(body);
-    }
-    reasons.push("Jupiter returned no xStock prices.");
+    jupiter = await fromJupiter();
+    if (Object.keys(jupiter).length === 0) reasons.push("Jupiter returned no xStock prices.");
   } catch (error) {
     reasons.push(error instanceof Error ? error.message : "Jupiter is unreachable right now.");
+  }
+
+  const key = apiKey();
+  const pyth = key ? await fromPyth(key).catch(() => ({}) as Record<string, StockPrice>) : {};
+  if (!key) reasons.push("No PYTH_API_KEY configured.");
+
+  // Jupiter prices every xStock and supplies its dividend rate. Where Pyth has the
+  // underlying stock, its price becomes the reference and the token's own price is
+  // kept beside it, so the gap between the two can be shown rather than hidden.
+  const prices: Record<string, StockPrice> = {};
+  for (const [symbol, jup] of Object.entries(jupiter)) {
+    const stock = pyth[symbol.replace(/x$/, "")];
+    if (!stock) {
+      prices[symbol] = jup;
+      continue;
+    }
+    const tokenPrice = jup.tokenPrice;
+    prices[symbol] = {
+      ...stock,
+      symbol,
+      annualizedRate: jup.annualizedRate,
+      tokenPrice,
+      premium: tokenPrice ? tokenPrice / stock.price - 1 : null,
+    };
+  }
+
+  if (Object.keys(prices).length > 0) {
+    const pythSymbols = Object.keys(pyth).sort();
+    const body: PricesResponse = {
+      enabled: true,
+      prices,
+      source: pythSymbols.length > 0 ? "pyth" : "jupiter",
+      pyth: pythSymbols,
+    };
+    cache = { at: Date.now(), body };
+    return NextResponse.json(body);
   }
 
   const off: PricesResponse = { enabled: false, prices: {}, reason: reasons.join(" ") };

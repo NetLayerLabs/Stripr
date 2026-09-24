@@ -58,6 +58,22 @@ function priceNote(stock: StockPrice) {
   return "Pyth · live";
 }
 
+/**
+ * The xStock's own on-chain price against Pyth's price for the stock it tracks. Only
+ * shown where Pyth priced the underlying, since that is the one place the two differ.
+ */
+function tokenVsStock(market: MarketView, stock: StockPrice) {
+  if (stock.source !== "pyth" || stock.tokenPrice === null || stock.premium === null) return null;
+  const pct = stock.premium * 100;
+  const word = Math.abs(pct) < 0.005 ? "at par" : `${pct > 0 ? "+" : "−"}${Math.abs(pct).toFixed(2)}% vs stock`;
+  return (
+    <>
+      {market.symbol} on-chain {formatUsd(stock.tokenPrice)} ·{" "}
+      <span className={Math.abs(pct) <= 0.5 ? "text-emerald-300" : "text-amber-300"}>{word}</span>
+    </>
+  );
+}
+
 export function TradePanel({ market, position, actions }: Props) {
   const offers = useOffers(market);
   const { publicKey } = useWallet();
@@ -128,9 +144,19 @@ export function TradePanel({ market, position, actions }: Props) {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         {stock ? (
           <StatTile
-            label={`${market.symbol} reference price`}
+            label={stock.source === "pyth" ? `${market.symbol.replace(/x$/, "")} stock price` : `${market.symbol} reference price`}
             value={formatUsd(stock.price)}
-            sub={priceNote(stock)}
+            sub={
+              tokenVsStock(market, stock) ? (
+                <>
+                  {priceNote(stock)}
+                  <br />
+                  {tokenVsStock(market, stock)}
+                </>
+              ) : (
+                priceNote(stock)
+              )
+            }
           />
         ) : (
           <StatTile
