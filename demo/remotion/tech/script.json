@@ -1,0 +1,46 @@
+[
+ [
+  "t00",
+  "Stripr, under the hood."
+ ],
+ [
+  "t01",
+  "One Anchor program, twelve instructions. Each stock gets a market, derived from its mint. It mints PT and YT, and owns the vault that holds the stock. No admin instruction can touch that vault; only a program upgrade could, or the issuer's own permanent delegate."
+ ],
+ [
+  "t02",
+  "PT and YT are minted in share units: raw tokens, times the stock's multiplier. Before a dividend or after it, a share is still a share."
+ ],
+ [
+  "t03",
+  "The multiplier is read straight from the mint's Scaled UI Amount extension, and a scheduled rise counts only once its effective time arrives."
+ ],
+ [
+  "t04",
+  "When it rises, the same shares need fewer raw tokens. Syncing gives the difference to locked YT, rounded down and paid in the stock, or holds it until someone locks. The stored multiplier never moves down, so a cut can't push principal claims past the vault."
+ ],
+ [
+  "t05",
+  "Payouts use accumulator indexes, one for cash and one for stock. Each payout spreads with one division, however much YT is locked, and a position settles when its owner next locks, unlocks or claims."
+ ],
+ [
+  "t06",
+  "Accrual rounds down, and debt rounds up. A unit test runs two hundred rounds of uneven payouts, then asserts total claims don't exceed total deposits."
+ ],
+ [
+  "t07",
+  "Offers escrow tokens only the offer's own address can release. A fill must quote the price the buyer saw, and a sold-out offer normally closes and refunds its rent."
+ ],
+ [
+  "t08",
+  "Every transfer is transfer checked. One test opens a market on a copy of the real Apple xStock mint; another strips a pausable, xStock-style mint."
+ ],
+ [
+  "t09",
+  "Nineteen end-to-end tests and eight unit tests pass, and the mainnet program is byte-for-byte this repository's build."
+ ],
+ [
+  "t10",
+  "Stripr. Boring on purpose, and MIT licensed."
+ ]
+]

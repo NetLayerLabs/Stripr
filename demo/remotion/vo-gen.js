@@ -20,7 +20,7 @@ const MODEL = 'eleven_multilingual_v2'
 
 // Every figure spoken here is read live from mainnet by the app: the AAPLx multiplier
 // step of 8 Aug 2026, and PGx's realized 1.67% a year (YT at 8.78 USDC -> 28.1%, 3.56 yrs).
-const SECTIONS = [
+const WALKTHROUGH = [
   ['00', "Stripr. Yield stripping, for tokenized stocks on Solana."],
   ['01', "A tokenized stock pays you twice. Once in its price, and again in its dividends. But today, you can only ever sell the two together."],
   ['02', "Here's the part most people miss. xStocks don't airdrop a dividend. They raise a multiplier on the token itself. On the eighth of August, Apple's moved from one point zero zero two six, to one point zero zero three three, and every balance quietly grew. That is real yield, already on chain. And nobody can trade it on its own."],
@@ -35,11 +35,19 @@ const SECTIONS = [
   ['11', "Stripr. A share's dividends, as an asset you can own, price, and sell. Live now, at stripr dot xyz."],
 ]
 
+
+// The script is data: vo-gen.js narrates the walkthrough, and SCRIPT=tech/script.json
+// narrates the technical cut into its own folders, with the same voice and settings.
+const SCRIPT = process.env.SCRIPT
+const SECTIONS = SCRIPT ? JSON.parse(fs.readFileSync(SCRIPT, 'utf8')) : WALKTHROUGH
+const AUDIO_DIR = process.env.AUDIO_DIR || 'public/vo'
+const ALIGN_DIR = process.env.ALIGN_DIR || 'src/vo'
+
 const only = process.env.VO_ONLY ? process.env.VO_ONLY.replace(/^v/, '') : null
 const todo = SECTIONS.filter(([id]) => !only || id === only)
 console.log('characters:', todo.reduce((n, s) => n + s[1].length, 0), 'in', todo.length, 'sections')
-fs.mkdirSync('public/vo', { recursive: true })
-fs.mkdirSync('src/vo', { recursive: true })
+fs.mkdirSync(AUDIO_DIR, { recursive: true })
+fs.mkdirSync(ALIGN_DIR, { recursive: true })
 
 ;(async () => {
   for (const [id, text] of todo) {
@@ -54,7 +62,7 @@ fs.mkdirSync('src/vo', { recursive: true })
     if (!res.ok) { console.error(`v${id}: ${res.status} ${(await res.text()).slice(0, 200)}`); continue }
     const body = await res.json()
     const buf = Buffer.from(body.audio_base64, 'base64')
-    fs.writeFileSync(`public/vo/v${id}.mp3`, buf)
+    fs.writeFileSync(`${AUDIO_DIR}/${/^\d/.test(id) ? 'v' + id : id}.mp3`, buf)
     const a = body.alignment
     // Collapse the character alignment into words with start/end seconds.
     const words = []
@@ -66,7 +74,7 @@ fs.mkdirSync('src/vo', { recursive: true })
       cur.e = a.character_end_times_seconds[i]
     })
     if (cur) words.push(cur)
-    fs.writeFileSync(`src/vo/v${id}.json`, JSON.stringify({ text, words }, null, 0) + '\n')
-    console.log(`v${id}: ${(buf.length / 1024).toFixed(0)}kb, ${words.length} words, ends ${words.at(-1).e.toFixed(2)}s`)
+    fs.writeFileSync(`${ALIGN_DIR}/${/^\d/.test(id) ? 'v' + id : id}.json`, JSON.stringify({ text, words }, null, 0) + '\n')
+    console.log(`${id}: ${(buf.length / 1024).toFixed(0)}kb, ${words.length} words, ends ${words.at(-1).e.toFixed(2)}s`)
   }
 })()
