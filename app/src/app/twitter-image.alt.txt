@@ -1,0 +1,1 @@
+Stripr: split a stock into its principal and its yield. One AAPLx share becomes PT-AAPLx, the claim on the stock, and YT-AAPLx, every dividend it pays. Live on Solana mainnet across 15 xStocks markets.

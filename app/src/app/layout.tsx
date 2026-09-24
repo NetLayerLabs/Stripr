@@ -20,9 +20,16 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+// Production resolves the share card against the real domain. VERCEL_URL is the
+// per-deployment address, which sits behind Vercel's login, so crawlers following
+// it get a redirect instead of the image and the link unfurls with no picture.
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  (process.env.VERCEL_ENV === "production"
+    ? "https://stripr.xyz"
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
 
 export const metadata: Metadata = {
   // Absolute URLs for the share card.
