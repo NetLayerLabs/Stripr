@@ -1,7 +1,7 @@
 {
   "name": "stripr",
   "private": true,
-  "license": "Apache-2.0",
+  "license": "MIT",
   "scripts": {
     "idl:sync": "cp target/idl/stripr.json app/src/idl/stripr.json && cp target/types/stripr.ts app/src/idl/stripr.ts",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",

@@ -2,7 +2,7 @@
 name = "stripr"
 version = "0.1.0"
 description = "Yield stripping for tokenized stocks on Solana"
-license = "Apache-2.0"
+license = "MIT"
 edition.workspace = true
 rust-version.workspace = true
 

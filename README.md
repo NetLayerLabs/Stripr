@@ -35,6 +35,7 @@ Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.c
 - [Getting started](#getting-started)
 - [Built with](#built-with)
 - [Known limitations](#known-limitations)
+- [License](#license)
 
 ## For judges
 
@@ -267,3 +268,7 @@ Stripr's program, app and demo are original work for this hackathon, built on th
 - **Fixed-price offers, not an AMM.** Prices come from sellers' listings, so thin markets can have wide spreads. PT and YT don't expire yet; maturity-dated series and a PT/YT AMM are the next step.
 - **Early mainnet liquidity.** The mainnet markets are live but thin; devnet carries the seeded history and order books.
 - **Pyth coverage.** The underlying stock's price comes from Pyth only for the stocks the configured key is entitled to (TSLA and QQQ today). The others use Jupiter.
+
+## License
+
+[MIT](LICENSE). Copyright (c) 2026 NetLayer Labs.

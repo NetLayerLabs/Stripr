@@ -2,6 +2,7 @@
   "name": "stripr-video",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "clips": "node scripts/clips-manifest.mjs",
     "capture": "node scripts/capture.mjs",
