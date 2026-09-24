@@ -9,7 +9,7 @@
 
 Each part can be kept, sold or bought separately, and a PT + YT pair always redeems for the original stock. An on-chain offer book lets anyone sell future dividends for USDC today, or buy them.
 
-**[Live app](https://stripr.xyz)** · **[Demo video](https://youtu.be/ZmsOdKGkx64)** · **[Program on mainnet](https://explorer.solana.com/address/9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF)** · **[Submission notes](docs/submission.md)**
+**[Live app](https://stripr.xyz)** · **[Demo video](https://youtu.be/ZmsOdKGkx64)** · **[Technical video](https://youtu.be/JoxztgzW_N4)** · **[Program on mainnet](https://explorer.solana.com/address/9wpHmYvuq7qrAuH4VV3LyC54d2VyTYFMfveMMph2nzZF)** · **[Submission notes](docs/submission.md)**
 
 Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.com/hackathons/stocklana), main track, Credit & Yield.
 
@@ -186,7 +186,10 @@ Realized dividend rates, annualized since each token launched (read live, 24 Sep
 
 ## Demo video
 
-**[Watch the 2m31s walkthrough on YouTube](https://youtu.be/ZmsOdKGkx64)**, rendered with [Remotion](https://remotion.dev) from recordings of the live app.
+Two films, both rendered with [Remotion](https://remotion.dev):
+
+- **[Walkthrough (2:31)](https://youtu.be/ZmsOdKGkx64):** the product, from recordings of the live app.
+- **[Under the hood (1:57)](https://youtu.be/JoxztgzW_N4):** the program itself. Every line of code on screen is verbatim from `programs/stripr`, with its real line numbers.
 
 The footage is real. The capture registers a Wallet Standard wallet in the page and sends every signature to a local signer that holds a devnet key, so the strip in the video is an actual devnet transaction. The pipeline lives in [`demo/remotion`](demo/remotion).
 
