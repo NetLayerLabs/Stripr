@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import deployment from "@/config/deployment.json";
-import { serverRpcUrl } from "@/lib/config";
+import { rpcFetch } from "@/lib/rpc";
 
 export const dynamic = "force-dynamic";
 
@@ -73,17 +73,15 @@ export async function GET() {
   const ids = Object.keys(mints).filter((mint) => mints[mint].symbol !== "USDC");
   try {
     const [accounts, prices] = await Promise.all([
-      fetch(serverRpcUrl("mainnet-beta"), {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
+      rpcFetch(
+        "mainnet-beta",
+        JSON.stringify({
           jsonrpc: "2.0",
           id: 1,
           method: "getMultipleAccounts",
           params: [ids, { encoding: "jsonParsed" }],
-        }),
-        cache: "no-store",
-      }).then(async (r) => {
+        })
+      ).then(async (r) => {
         if (!r.ok) throw new Error(`Mainnet RPC responded ${r.status}`);
         return ((await r.json()) as { result?: { value: Array<ParsedMint | null> } }).result?.value ?? [];
       }),

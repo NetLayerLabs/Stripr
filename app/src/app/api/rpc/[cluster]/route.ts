@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { parseCluster, serverRpcUrl } from "@/lib/config";
+import { parseCluster } from "@/lib/config";
+import { rpcFetch } from "@/lib/rpc";
 
 export const dynamic = "force-dynamic";
 
@@ -69,12 +70,7 @@ export async function POST(request: Request, { params }: { params: { cluster: st
   if (!allowed) return reject("Method not allowed.", 403);
 
   try {
-    const upstream = await fetch(serverRpcUrl(cluster), {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body,
-      cache: "no-store",
-    });
+    const upstream = await rpcFetch(cluster, body);
     return new NextResponse(await upstream.text(), {
       status: upstream.status,
       headers: { "content-type": "application/json" },

@@ -2,6 +2,7 @@ import { EventParser } from "@anchor-lang/core";
 import { Connection, PublicKey, type ConfirmedSignatureInfo } from "@solana/web3.js";
 import { NextResponse } from "next/server";
 import { DEFAULT_CLUSTER, parseCluster, serverRpcUrl, type Cluster } from "@/lib/config";
+import { fallbackFetch } from "@/lib/rpc";
 import { PROGRAM_ID, getProgram } from "@/lib/stripr";
 import devnetSnapshot from "@/config/history.devnet.json";
 
@@ -99,7 +100,7 @@ async function decodeTransaction(
 }
 
 async function loadEvents(cluster: Cluster, market: PublicKey): Promise<MarketEvent[]> {
-  const connection = new Connection(serverRpcUrl(cluster), "confirmed");
+  const connection = new Connection(serverRpcUrl(cluster), { commitment: "confirmed", fetch: fallbackFetch(cluster) });
   const parser = new EventParser(PROGRAM_ID, getProgram(connection).coder);
   const key = market.toBase58();
   const snapshot = SNAPSHOTS[cluster]?.[key];
