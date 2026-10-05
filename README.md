@@ -35,6 +35,7 @@ Built by NetLayer Labs for the [Stocklana Hackathon](https://hackathons.solana.c
 - [Getting started](#getting-started)
 - [Built with](#built-with)
 - [Known limitations](#known-limitations)
+- [After the deadline](#after-the-deadline)
 - [License](#license)
 
 ## For judges
@@ -271,6 +272,12 @@ Stripr's program, app and demo are original work for this hackathon, built on th
 - **Fixed-price offers, not an AMM.** Prices come from sellers' listings, so thin markets can have wide spreads. PT and YT don't expire yet; maturity-dated series and a PT/YT AMM are the next step.
 - **Early mainnet liquidity.** The mainnet markets are live but thin; devnet carries the seeded history and order books.
 - **Pyth coverage.** The underlying stock's price comes from Pyth only for the stocks the configured key is entitled to (TSLA and QQQ today). The others use Jupiter.
+
+## After the deadline
+
+The submission is the state of this repo at the Stocklana deadline (25 September 2026, 4:00 PM ET). One change has been made since, to keep the live app reachable, and it adds no features:
+
+- **5 October 2026, `ecb8ab0`:** the mainnet RPC provider's plan hit its usage cap and began refusing requests, so stripr.xyz could not load its markets. Server-side RPC calls now fall back to Solana's public RPC when the provider refuses. The program, the markets and the app's behavior are unchanged.
 
 ## License
 
